@@ -1,0 +1,33 @@
+server:
+  port: 2308
+spring:
+  application:
+    name: hrm-service-app
+  data:
+    mongodb:
+      host: 42.113.122.118
+      port: 27017
+      database: HRM_vnfite_test
+      username: devVnfite
+      password: Vnfite20250222
+      authentication-database: CRM_vnfite_v2_test
+      auto-index-creation: true
+  static-dir:
+    #    avatar-user: /var/www/html/images/hrm_avt/
+    #    file-user: /var/www/html/images/hrm_file/
+    avatar-user: E:\test_hrm_avt
+    file-user: E:\test_hrm_file
+  crm:
+    url: https://crm.vnfite.com.vn
+    #    url: http://192.168.1.89:8903
+    gen-token: /auth/gen-token
+    verify-create: /auth/verify-create
+redis:
+  redisson:
+    mode: SINGLE
+    address-single: redis://42.113.122.119:6379
+    connection-pool-size: 10
+    connection-minimum-idle-size: 5
+    connect-timeout: 30000
+jwt:
+  secret: 3fc1905642881aa3921e8e00568e5eef94fcd5f62104306863d8e9df4927973295825e2ae424c096a6b8a0bfe4ef827a19f9857e8178b66e6284a88362ef7cffdabeb890d14ed318be8eb597a5fd2c014dde3f138a41a559b20de35f69a45b1a307bf40f317c86e0cc0a72ab5efe85120aefbc50f5ddbdb614c59d6d08afe17cc50d9e72434ae06b5aa1102a1fc6bcdb45ee93be4d4b5e7779a275429b70ec9a029fce8622283f265f4a8bd34dfe7530eab25288f0d6489085481c84476b40c440936ec65d3ef33a8d9c8b4c02cafeae7e3c386b7c40a3b3a0e465c42c71c09238f52a156043f3337e7924c61563f046359e41c9a8b3baf1929ef24c2e13c93a
