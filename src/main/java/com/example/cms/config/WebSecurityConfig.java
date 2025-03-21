@@ -33,7 +33,6 @@ public class WebSecurityConfig {
                         .antMatchers("**", Constant.ROOT_PATH.concat("auth"),Constant.ROOT_PATH.concat("token/check-accessToken")
                         ).permitAll()
                 )
-//                .exceptionHandling(r->r.accessDeniedHandler(customAccessDenyHandler))
                 .sessionManagement(httpSecuritySessionManagementConfigurer ->
                         httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
