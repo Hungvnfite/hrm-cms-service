@@ -2,7 +2,7 @@ server:
   port: 2308
 spring:
   application:
-    name: hrm-service-app
+    name: hrm-service-cms
     domain: http://14.224.135.196
   data:
     mongodb:
