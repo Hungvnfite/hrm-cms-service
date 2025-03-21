@@ -8,8 +8,8 @@ public class Constant {
     public static final String TRANSACTION_ID_KEY = "transactionId";
     public static final String ACCESS_STRING = "access";
     public static final String REFRESH_STRING = "refresh";
-    public static final String URL_IMG_AVATAR = "/var/www/html/images/hrm_avt/";
-    public static final String URL_IMG_FILE = "/var/www/html/images/hrm_file/";
+    public static final String URL_IMG_AVATAR = "/images/hrm_avt/";
+    public static final String URL_IMG_FILE = "/images/hrm_file/";
 
     public interface IGNORE_URL {
         String LOGIN = "/api/hrm-app/auth";

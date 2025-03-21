@@ -1,5 +1,6 @@
 package com.example.cms.config;
 
+import com.example.cms.common.Constant;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class WebSecurityConfig {
         // @formatter:off
         http.cors().and().csrf().disable()
                 .authorizeRequests(authorize -> authorize
-                        .antMatchers("**", "/api/hrm-cms/auth","/api/hrm-cms/token/check-accessToken"
+                        .antMatchers("**", Constant.ROOT_PATH.concat("auth"),Constant.ROOT_PATH.concat("token/check-accessToken")
                         ).permitAll()
                 )
 //                .exceptionHandling(r->r.accessDeniedHandler(customAccessDenyHandler))

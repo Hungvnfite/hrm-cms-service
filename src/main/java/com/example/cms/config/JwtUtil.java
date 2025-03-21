@@ -92,7 +92,7 @@ public class JwtUtil {
         try {
             Claims claims = getClaimsFromToken(token);
             Integer typeAccount = claims.get("typeAccount", Integer.class);
-            return typeAccount != null && typeAccount == 1; // Kiểm tra typeAccount = 1 (quản trị)
+            return typeAccount != null && typeAccount == 2; // Kiểm tra typeAccount = 2 (quản trị)
         } catch (Exception e) {
             return false;
         }
