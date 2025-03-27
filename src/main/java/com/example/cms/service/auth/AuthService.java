@@ -44,7 +44,7 @@ public class AuthService {
                 if (isMatchesPassword) {
                     LoginDTO loginDTO = new LoginDTO();
                     loginDTO.setIsFirstPassword(account.getIsFirstPassword());
-                     if (account.getTypeAccount() == 2) {
+                     if (account.getTypeAccount() == 1) {
                         String accessToken = jwtUtil.generateAccessToken(Constant.ACCESS_STRING.concat(String.valueOf(account.getId())), account.getTypeAccount());
                         loginDTO.setAccessToken(accessToken);
                         String refreshToken = jwtUtil.generateRefreshToken(Constant.REFRESH_STRING.concat(String.valueOf(account.getId())));
