@@ -14,8 +14,8 @@ spring:
       authentication-database: CRM_vnfite_v2_test
       auto-index-creation: true
   static-dir:
-        avatar-user: /var/www/html/images/hrm_avt/
-        file-user: /var/www/html/images/hrm_file/
+    avatar-user: /var/www/html/images/hrm_avt/
+    file-user: /var/www/html/images/hrm_file/
 #    avatar-user: E:\test_hrm_avt
 #    file-user: E:\test_hrm_file
   crm:

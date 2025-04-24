@@ -27,7 +27,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtil jwtTokenUtil;
 
-
+    public static HttpServletRequest REQUEST;
     @Autowired
     private AuthenticationFailureHandler authenticationFailureHandler;
     @Autowired
@@ -38,6 +38,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        REQUEST = request;
         // Bỏ qua xác thực cho các API cụ thể
         String header = request.getHeader("Authorization");
 

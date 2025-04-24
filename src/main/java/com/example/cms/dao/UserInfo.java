@@ -92,4 +92,8 @@ public class UserInfo {
     @Indexed
     @Field(name = "EMAIL")
     private String email;
+
+    @Indexed
+    @Field(name = "NUMBER_OF_DAYS_OFF_REMAINING")
+    private Double numberOfDaysOffRemaining;
 }

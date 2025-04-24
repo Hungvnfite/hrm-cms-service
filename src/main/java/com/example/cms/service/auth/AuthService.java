@@ -1,6 +1,7 @@
 package com.example.cms.service.auth;
 
 import com.example.cms.common.Constant;
+import com.example.cms.common.DateUtil;
 import com.example.cms.common.ResponseCode;
 import com.example.cms.common.Utility;
 import com.example.cms.config.JwtUtil;
@@ -54,6 +55,7 @@ public class AuthService {
                         sessionData.setAccountId(String.valueOf(account.getId()));
                         sessionData.setRefreshToken(refreshToken);
                         sessionData.setTypeAccount(account.getTypeAccount());
+//                        redissonService.clearSession();
                         redissonService.setSession(accessToken, sessionData);
                         redissonService.setAccessToken(Constant.ACCESS_STRING.concat(accessToken), accessToken);
                         redissonService.setRefreshToken(Constant.REFRESH_STRING.concat(refreshToken), refreshToken);
@@ -107,7 +109,7 @@ public class AuthService {
                     // Hash mật khẩu bằng BCrypt
                     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
                     account.setPassword(encoder.encode(md5String));
-                    account.setUpdatedAt(new Date().toString());
+                    account.setUpdatedAt(DateUtil.genCreatedAt(null));
                     account.setIsFirstPassword(false);
                     accountRepository.save(account);
                     resultExecute.put(Constant.RESPONSE_KEY.DATA, "Đổi mật khẩu thành công");

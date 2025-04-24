@@ -1,11 +1,15 @@
 package com.example.cms.common;
 
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -52,5 +56,23 @@ public class DateUtil {
 
         // Tạo regex hoàn chỉnh
         return ".*" + month + " (" + daysPattern + ") .* " + year;
+    }
+
+    public static String genCreatedAt(Timestamp timestamp){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh")); // Timezone của Việt Nam (GMT+7)
+        return sdf.format(Objects.requireNonNullElseGet(timestamp, Date::new));
+    }
+
+    public static long calculateDaysBetweenInclusive(String startDateStr, String endDateStr) throws Exception {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+        Date startDate = sdf.parse(startDateStr);
+        Date endDate = sdf.parse(endDateStr);
+
+        long diffInMillies = endDate.getTime() - startDate.getTime();
+        long diffInDays = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+
+        // Cộng thêm 1 để tính cả ngày đầu và ngày cuối
+        return diffInDays;
     }
 }
