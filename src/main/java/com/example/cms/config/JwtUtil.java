@@ -80,6 +80,19 @@ public class JwtUtil {
         }
     }
 
+    public String getSubject(String token) {
+        try {
+            // Parse token để lấy claims
+            Claims claims = getClaimsFromToken(token);
+
+            // So sánh với thời gian hiện tại
+            return claims.getSubject();
+        } catch (Exception e) {
+            // Xử lý trường hợp token không hợp lệ
+            return null; // Nếu có lỗi, coi như token đã hết hạn
+        }
+    }
+
     public Claims getClaimsFromToken(String token) {
         return Jwts.parser()
                 .setSigningKey(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
@@ -92,7 +105,7 @@ public class JwtUtil {
         try {
             Claims claims = getClaimsFromToken(token);
             Integer typeAccount = claims.get("typeAccount", Integer.class);
-            return typeAccount != null && typeAccount == 2; // Kiểm tra typeAccount = 2 (quản trị)
+            return typeAccount != null && typeAccount == 1; // Kiểm tra typeAccount = 2 (quản trị)
         } catch (Exception e) {
             return false;
         }

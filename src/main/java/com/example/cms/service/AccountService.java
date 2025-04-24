@@ -51,6 +51,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.security.MessageDigest;
 import java.text.Normalizer;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -133,8 +134,8 @@ public class AccountService {
             account.setPassword(encoder.encode(md5String));
             account.setIsFirstPassword(true);
             account.setTypeAccount(request.getTypeAccount());
-            account.setCreatedAt(new Date().toString());
-            account.setUpdatedAt(new Date().toString());
+            account.setCreatedAt(DateUtil.genCreatedAt(null));
+            account.setUpdatedAt(DateUtil.genCreatedAt(null));
 
             UserInfo userInfo = new UserInfo();
             userInfo.setUsername(username);
@@ -157,8 +158,8 @@ public class AccountService {
             userInfo.setGender(request.getGender());
             userInfo.setPhone(request.getPhone());
             userInfo.setEmail(request.getEmail());
-            userInfo.setCreatedAt(new Date().toString());
-            userInfo.setUpdatedAt(new Date().toString());
+            userInfo.setCreatedAt(DateUtil.genCreatedAt(null));
+            userInfo.setUpdatedAt(DateUtil.genCreatedAt(null));
 
             CreateAccountInfoCrmRequest createAccountInfoCrmRequest = new CreateAccountInfoCrmRequest();
             createAccountInfoCrmRequest.setFullName(request.getFullName());
@@ -194,8 +195,8 @@ public class AccountService {
                         saveImage(folderNameFile, file, uniqueFilename1);
                         hoSo.setName(uniqueFilename1);
                         hoSo.setPath(Constant.URL_IMG_FILE.concat(uniqueFilename1));
-                        hoSo.setCreatedAt(new Date().toString());
-                        hoSo.setUpdatedAt(new Date().toString());
+                        hoSo.setCreatedAt(DateUtil.genCreatedAt(null));
+                        hoSo.setUpdatedAt(DateUtil.genCreatedAt(null));
                         hoSo.setType(getFileExtension(Objects.requireNonNull(uniqueFilename1)));
                         String unit = convertMultipartFileToUnit(file);
                         hoSo.setCapacity(unit);
@@ -249,8 +250,8 @@ public class AccountService {
                 userInfo.setGender(request.getGender());
                 userInfo.setPhone(request.getPhone());
                 userInfo.setEmail(request.getEmail());
-                userInfo.setCreatedAt(new Date().toString());
-                userInfo.setUpdatedAt(new Date().toString());
+                userInfo.setCreatedAt(DateUtil.genCreatedAt(null));
+                userInfo.setUpdatedAt(DateUtil.genCreatedAt(null));
 
                 // Lấy tên gốc của file và tạo tên duy nhất
                 if (avatar != null) {
@@ -343,8 +344,8 @@ public class AccountService {
                             hoSo1.setId(new ObjectId());
                             hoSo1.setName(uniqueFilename);
                             hoSo1.setPath(Constant.URL_IMG_FILE.concat(uniqueFilename));
-                            hoSo1.setCreatedAt(new Date().toString());
-                            hoSo1.setUpdatedAt(new Date().toString());
+                            hoSo1.setCreatedAt(DateUtil.genCreatedAt(null));
+                            hoSo1.setUpdatedAt(DateUtil.genCreatedAt(null));
                             hoSo1.setType(getFileExtension(uniqueFilename));
                             String unit = convertMultipartFileToUnit(file);
                             hoSo1.setCapacity(unit);
@@ -647,40 +648,43 @@ public class AccountService {
                 List<AccountInfoDTO> accountInfoDTOs = userInfoPage.getContent().stream()
                         .map(account -> {
                             Account account1 = accountRepository.findTopByUsernameAndIsDelete(account.getUsername(), false);
-                            AccountInfoDTO accountInfoDTO = new AccountInfoDTO();
-                            accountInfoDTO.setAccountId(String.valueOf(account1.getId()));
+                            if (account1 != null){
+                                AccountInfoDTO accountInfoDTO = new AccountInfoDTO();
+                                accountInfoDTO.setAccountId(String.valueOf(account1.getId()));
 
-                            accountInfoDTO.setMaNv(account.getMaNv());
-                            accountInfoDTO.setFullName(account.getFullName());
-                            accountInfoDTO.setTypeAccount(account1.getTypeAccount());
+                                accountInfoDTO.setMaNv(account.getMaNv());
+                                accountInfoDTO.setFullName(account.getFullName());
+                                accountInfoDTO.setTypeAccount(account1.getTypeAccount());
 
-                            // Lấy thông tin phòng ban, chức vụ, trạng thái làm việc
-                            TrangThaiLamViec trangThaiLamViec = trangThaiLamViecRepository.findById(String.valueOf(account.getIdTrangThai())).orElse(null);
-                            if (trangThaiLamViec != null) {
-                                TrangThaiLamViecResponse trangThaiLamViecResponse = new TrangThaiLamViecResponse();
-                                trangThaiLamViecResponse.setId(String.valueOf(trangThaiLamViec.getId()));
-                                trangThaiLamViecResponse.setTenTrangThai(trangThaiLamViec.getTenTrangThai());
-                                accountInfoDTO.setTrangThai(trangThaiLamViecResponse);
+                                // Lấy thông tin phòng ban, chức vụ, trạng thái làm việc
+                                TrangThaiLamViec trangThaiLamViec = trangThaiLamViecRepository.findById(String.valueOf(account.getIdTrangThai())).orElse(null);
+                                if (trangThaiLamViec != null) {
+                                    TrangThaiLamViecResponse trangThaiLamViecResponse = new TrangThaiLamViecResponse();
+                                    trangThaiLamViecResponse.setId(String.valueOf(trangThaiLamViec.getId()));
+                                    trangThaiLamViecResponse.setTenTrangThai(trangThaiLamViec.getTenTrangThai());
+                                    accountInfoDTO.setTrangThai(trangThaiLamViecResponse);
+                                }
+
+
+                                PhongBan phongBan1 = phongBanRepository.findById(String.valueOf(account.getIdPhongBan())).orElse(null);
+                                if (phongBan1 != null) {
+                                    PhongBanResponse phongBanResponse = new PhongBanResponse();
+                                    phongBanResponse.setId(String.valueOf(phongBan1.getId()));
+                                    phongBanResponse.setTenPhongBan(phongBan1.getTenPhongBan());
+                                    accountInfoDTO.setPhongBan(phongBanResponse);
+                                }
+
+                                ChucVu chucVu1 = chucVuRepository.findById(String.valueOf(account.getIdChucVu())).orElse(null);
+                                if (chucVu1 != null) {
+                                    ChucVuResponse chucVuResponse = new ChucVuResponse();
+                                    chucVuResponse.setId(String.valueOf(chucVu1.getId()));
+                                    chucVuResponse.setTenChucVu(chucVu1.getTenChucVu());
+                                    accountInfoDTO.setChucVu(chucVuResponse);
+                                }
+
+                                return accountInfoDTO;
                             }
-
-
-                            PhongBan phongBan1 = phongBanRepository.findById(String.valueOf(account.getIdPhongBan())).orElse(null);
-                            if (phongBan1 != null) {
-                                PhongBanResponse phongBanResponse = new PhongBanResponse();
-                                phongBanResponse.setId(String.valueOf(phongBan1.getId()));
-                                phongBanResponse.setTenPhongBan(phongBan1.getTenPhongBan());
-                                accountInfoDTO.setPhongBan(phongBanResponse);
-                            }
-
-                            ChucVu chucVu1 = chucVuRepository.findById(String.valueOf(account.getIdChucVu())).orElse(null);
-                            if (chucVu1 != null) {
-                                ChucVuResponse chucVuResponse = new ChucVuResponse();
-                                chucVuResponse.setId(String.valueOf(chucVu1.getId()));
-                                chucVuResponse.setTenChucVu(chucVu1.getTenChucVu());
-                                accountInfoDTO.setChucVu(chucVuResponse);
-                            }
-
-                            return accountInfoDTO;
+                            return null;
                         })
                         .collect(Collectors.toList());
 
