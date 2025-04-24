@@ -5,11 +5,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -58,21 +58,29 @@ public class DateUtil {
         return ".*" + month + " (" + daysPattern + ") .* " + year;
     }
 
-    public static String genCreatedAt(Timestamp timestamp){
+    public static String genCreatedAt(Timestamp timestamp) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
         sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh")); // Timezone của Việt Nam (GMT+7)
         return sdf.format(Objects.requireNonNullElseGet(timestamp, Date::new));
     }
 
-    public static long calculateDaysBetweenInclusive(String startDateStr, String endDateStr) throws Exception {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
-        Date startDate = sdf.parse(startDateStr);
-        Date endDate = sdf.parse(endDateStr);
+//    public static long calculateDaysBetweenInclusive(String startDateStr, String endDateStr) throws Exception {
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+//        Date startDate = sdf.parse(startDateStr);
+//        Date endDate = sdf.parse(endDateStr);
+//
+//        long diffInMillies = endDate.getTime() - startDate.getTime();
+//
+//        // Cộng thêm 1 để tính cả ngày đầu và ngày cuối
+//        return TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+//    }
 
-        long diffInMillies = endDate.getTime() - startDate.getTime();
-        long diffInDays = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+    public static long calculateDaysBetweenInclusive(String startDateStr, String endDateStr) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        LocalDate startDate = LocalDate.parse(startDateStr, formatter);
+        LocalDate endDate = LocalDate.parse(endDateStr, formatter);
 
-        // Cộng thêm 1 để tính cả ngày đầu và ngày cuối
-        return diffInDays;
+        // ChronoUnit.DAYS.between() không bao gồm ngày cuối, nên cộng thêm 1
+        return ChronoUnit.DAYS.between(startDate, endDate);
     }
 }

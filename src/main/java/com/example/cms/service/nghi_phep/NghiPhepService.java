@@ -3,8 +3,8 @@ package com.example.cms.service.nghi_phep;
 import com.example.cms.common.Constant;
 import com.example.cms.common.DateUtil;
 import com.example.cms.common.ResponseCode;
-import com.example.cms.common.Utility;
 import com.example.cms.config.JwtUtil;
+import com.example.cms.dao.Account;
 import com.example.cms.dao.NghiPhep;
 import com.example.cms.dao.UserInfo;
 import com.example.cms.dto.base.Result;
@@ -28,13 +28,10 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -65,7 +62,7 @@ public class NghiPhepService {
             }
             Page<NghiPhep> nghiPheps;
             Pageable pageable = PageRequest.of(pageNumber, pageSize);
-            nghiPheps = nghiPhepRepository.findAllByStatusAndIsDelete(type, false, pageable);
+            nghiPheps = nghiPhepRepository.findAllByStatusAndIsDeleteOrderByCreatedAtDesc(type, false, pageable);
             if (!nghiPheps.isEmpty()) {
                 List<NghiPhepResponse> nghiPhepResponses = nghiPheps.getContent().stream()
                         .map(np -> {
@@ -133,7 +130,6 @@ public class NghiPhepService {
         return resultExecute;
     }
 
-    @Transactional
     public Map<Object, Object> acceptOrCancelRequest(String transactionId, ObjectId id, String status) {
         Map<Object, Object> resultExecute = new HashMap<>();
         AtomicReference<Result> result = new AtomicReference<>(Result.OK());
@@ -144,55 +140,111 @@ public class NghiPhepService {
                 resultExecute.put(Constant.RESPONSE_KEY.RESULT, result);
                 return resultExecute;
             }
-            if (!status.equalsIgnoreCase("0")){
-                nghiPhepRepository.findById(String.valueOf(id)).ifPresent(nghiPhep -> {
-                    accountRepository.findById(String.valueOf(nghiPhep.getAccountId())).ifPresent(account -> {
-                        UserInfo userInfo = userInfoRepository.findByUsernameAndIsDelete(account.getUsername(), false);
-                        if (userInfo != null) {
-                            if (Integer.parseInt(status) == 2) {
-                                double countStartDate = 1;
-                                double countEndDate = 1;
-                                if (nghiPhep.getIsHalfStartDate() == 0){
-                                    countStartDate = 0.5;
-                                }
-                                if (nghiPhep.getIsHalfEndDate() == 0){
-                                    countEndDate = 0.5;
-                                }
-                                double countDate = 0;
-                                try {
-                                    countDate = DateUtil.calculateDaysBetweenInclusive(nghiPhep.getStartDate(), nghiPhep.getEndDate()) - 1 + countStartDate + countEndDate;
-                                } catch (Exception e) {
-                                    logger.error("transactionId: {} - xảy ra ngoại lệ khi thực hiện lấy danh sách nghỉ phép! Rootcause: {}", transactionId, e);
-                                    throw new RuntimeException("Error calculating days between dates", e);
-                                }
-                                if (nghiPhep.getLeaveType() == 0) {
-                                    if (nghiPhep.getIsHalfDay() == 0) {
-                                        userInfo.setNumberOfDaysOffRemaining(userInfo.getNumberOfDaysOffRemaining() + 0.5);
+            if (!status.equalsIgnoreCase("0")) {
+                NghiPhep nghiPhep = nghiPhepRepository.findById(String.valueOf(id)).orElse(null);
+                if (nghiPhep != null) {
+                    Account account = accountRepository.findById(String.valueOf(nghiPhep.getAccountId())).orElse(null);
+                    if (account != null) {
+                        if (nghiPhep.getStatus() == 0) {
+                            UserInfo userInfo = userInfoRepository.findByUsernameAndIsDelete(account.getUsername(), false);
+                            if (userInfo != null) {
+                                if (Integer.parseInt(status) == 2) {
+                                    double countStartDate = 1;
+                                    double countEndDate = 1;
+                                    if (nghiPhep.getIsHalfStartDate() == 0) {
+                                        countStartDate = 0.5;
                                     }
-                                    if (nghiPhep.getIsHalfDay() == 1) {
-                                        userInfo.setNumberOfDaysOffRemaining(userInfo.getNumberOfDaysOffRemaining() + 1);
+                                    if (nghiPhep.getIsHalfEndDate() == 0) {
+                                        countEndDate = 0.5;
                                     }
-                                    if (nghiPhep.getIsHalfDay() == 2) {
-                                        userInfo.setNumberOfDaysOffRemaining(userInfo.getNumberOfDaysOffRemaining() + countDate);
+                                    double countDate = DateUtil.calculateDaysBetweenInclusive(nghiPhep.getStartDate(), nghiPhep.getEndDate()) - 1 + countStartDate + countEndDate;
+                                    if (nghiPhep.getLeaveType() == 0) {
+                                        if (nghiPhep.getIsHalfDay() == 0) {
+                                            userInfo.setNumberOfDaysOffRemaining(userInfo.getNumberOfDaysOffRemaining() + 0.5);
+                                        }
+                                        if (nghiPhep.getIsHalfDay() == 1) {
+                                            userInfo.setNumberOfDaysOffRemaining(userInfo.getNumberOfDaysOffRemaining() + 1);
+                                        }
+                                        if (nghiPhep.getIsHalfDay() == 2) {
+                                            userInfo.setNumberOfDaysOffRemaining(userInfo.getNumberOfDaysOffRemaining() + countDate);
+                                        }
+                                        userInfoRepository.save(userInfo);
                                     }
-                                    userInfoRepository.save(userInfo);
                                 }
+                                String accountIdReviewer = jwtUtil.getSubject(jwtUtil.getToken(request));
+                                SessionData sessionData = redissonService.getSession(jwtUtil.getToken(request));
+                                if (sessionData != null) {
+                                    nghiPhep.setReviewer(new ObjectId(sessionData.getAccountId()));
+                                } else {
+                                    if (accountIdReviewer != null) {
+                                        String cleanId;
+                                        if (accountIdReviewer.startsWith("access")) {
+                                            cleanId = accountIdReviewer.substring(6);
+                                        } else {
+                                            cleanId = accountIdReviewer; // Giữ nguyên nếu không bắt đầu bằng "access"
+                                        }
+                                        nghiPhep.setReviewer(new ObjectId(cleanId));
+                                    }
+                                }
+                                nghiPhep.setStatus(Integer.parseInt(status));
+                                nghiPhep.setUpdatedAt(DateUtil.genCreatedAt(null));
+                                nghiPhepRepository.save(nghiPhep);
                             }
-                            String accountIdReviewer = jwtUtil.getSubject(jwtUtil.getToken(request));
-                            SessionData sessionData = redissonService.getSession(jwtUtil.getToken(request));
-                            if (sessionData != null) {
-                                nghiPhep.setReviewer(new ObjectId(sessionData.getAccountId()));
-                            } else {
-                                if (accountIdReviewer != null) {
-                                    nghiPhep.setReviewer(new ObjectId(accountIdReviewer));
-                                }
-                            }
-                            nghiPhep.setStatus(Integer.parseInt(status));
-                            nghiPhep.setUpdatedAt(DateUtil.genCreatedAt(null));
-                            nghiPhepRepository.save(nghiPhep);
+                        } else {
+                            result.set(new Result(ResponseCode.ERROR_CANCEL_LEAVE.getCode(), false, ResponseCode.ERROR_CANCEL_LEAVE.getMessage()));
+                            resultExecute.put(Constant.RESPONSE_KEY.RESULT, result);
+                            return resultExecute;
                         }
-                    });
-                });
+                    }
+                }
+//                nghiPhepRepository.findById(String.valueOf(id)).ifPresent(nghiPhep -> {
+//                    accountRepository.findById(String.valueOf(nghiPhep.getAccountId())).ifPresent(account -> {
+//                        UserInfo userInfo = userInfoRepository.findByUsernameAndIsDelete(account.getUsername(), false);
+//                        if (userInfo != null) {
+//                            if (Integer.parseInt(status) == 2) {
+//                                double countStartDate = 1;
+//                                double countEndDate = 1;
+//                                if (nghiPhep.getIsHalfStartDate() == 0) {
+//                                    countStartDate = 0.5;
+//                                }
+//                                if (nghiPhep.getIsHalfEndDate() == 0) {
+//                                    countEndDate = 0.5;
+//                                }
+//                                double countDate = DateUtil.calculateDaysBetweenInclusive(nghiPhep.getStartDate(), nghiPhep.getEndDate()) - 1 + countStartDate + countEndDate;
+//                                if (nghiPhep.getLeaveType() == 0) {
+//                                    if (nghiPhep.getIsHalfDay() == 0) {
+//                                        userInfo.setNumberOfDaysOffRemaining(userInfo.getNumberOfDaysOffRemaining() + 0.5);
+//                                    }
+//                                    if (nghiPhep.getIsHalfDay() == 1) {
+//                                        userInfo.setNumberOfDaysOffRemaining(userInfo.getNumberOfDaysOffRemaining() + 1);
+//                                    }
+//                                    if (nghiPhep.getIsHalfDay() == 2) {
+//                                        userInfo.setNumberOfDaysOffRemaining(userInfo.getNumberOfDaysOffRemaining() + countDate);
+//                                    }
+//                                    userInfoRepository.save(userInfo);
+//                                }
+//                            }
+//                            String accountIdReviewer = jwtUtil.getSubject(jwtUtil.getToken(request));
+//                            SessionData sessionData = redissonService.getSession(jwtUtil.getToken(request));
+//                            if (sessionData != null) {
+//                                nghiPhep.setReviewer(new ObjectId(sessionData.getAccountId()));
+//                            } else {
+//                                if (accountIdReviewer != null) {
+//                                    String cleanId;
+//                                    if (accountIdReviewer.startsWith("access")) {
+//                                        cleanId = accountIdReviewer.substring(6);
+//                                    } else {
+//                                        cleanId = accountIdReviewer; // Giữ nguyên nếu không bắt đầu bằng "access"
+//                                    }
+//                                    nghiPhep.setReviewer(new ObjectId(cleanId));
+//                                }
+//                            }
+//                            nghiPhep.setStatus(Integer.parseInt(status));
+//                            nghiPhep.setUpdatedAt(DateUtil.genCreatedAt(null));
+//                            nghiPhepRepository.save(nghiPhep);
+//                        }
+//                    });
+//                });
             }
         } catch (Exception ex) {
             logger.error("transactionId: {} - xảy ra ngoại lệ khi thực hiện lấy danh sách nghỉ phép! Rootcause: {}", transactionId, ex);

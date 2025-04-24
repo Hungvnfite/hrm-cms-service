@@ -16,7 +16,7 @@ public interface NghiPhepRepository extends MongoRepository<NghiPhep, String> {
 
     List<NghiPhep> findAllByAccountIdAndStatusNotAndIsDelete(ObjectId accountId, Integer status, Boolean isDelete);
 
-    Page<NghiPhep> findAllByStatusAndIsDelete(Integer status, Boolean isDelete, Pageable pageable);
+    Page<NghiPhep> findAllByStatusAndIsDeleteOrderByCreatedAtDesc(Integer status, Boolean isDelete, Pageable pageable);
 
     Page<NghiPhep> findAllByStatusNotAndIsDelete(Integer status, Boolean isDelete, Pageable pageable);
 }

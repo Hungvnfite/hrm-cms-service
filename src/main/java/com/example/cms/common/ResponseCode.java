@@ -10,7 +10,8 @@ public enum ResponseCode {
 
     LG_WRONG_USER("ERR_001_2005", "Sai thông tin tài khoản/ mật khẩu"),
 
-    AUTHOR_NOT_ALLOW("ERR_001_2006", "Không đủ quyền để thực hiện thao tác");
+    AUTHOR_NOT_ALLOW("ERR_001_2006", "Không đủ quyền để thực hiện thao tác"),
+    ERROR_CANCEL_LEAVE("ERR_001_2007", "Bạn không thể hành động do đơn đã hủy!");
 
     private String code;
     private String message;
