@@ -208,7 +208,10 @@ public class AccountService {
                     userInfoRepository.save(userInfo);
                 }
             }
-            resultExecute.put(Constant.RESPONSE_KEY.DATA, password.toString());
+            Map<String, String> mapData = new HashMap<>();
+            mapData.put("username", username);
+            mapData.put("password", password.toString());
+            resultExecute.put(Constant.RESPONSE_KEY.DATA, mapData);
         } catch (Exception ex) {
             logger.error("transactionId: {} - xảy ra ngoại lệ khi thực hiện thêm mới người dùng! Rootcause: {}", transactionId, ex);
             result = new Result(ResponseCode.SYSTEM.getCode(), false, ResponseCode.SYSTEM.getMessage());
