@@ -11,6 +11,7 @@ import com.example.cms.repository.ChucVuRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -73,6 +74,81 @@ public class ChucVuService {
             chucVuResponse.setId(String.valueOf(chucVu.getId()));
             chucVuResponse.setTenChucVu(title);
             resultExecute.put(Constant.RESPONSE_KEY.DATA, chucVuResponse);
+        } catch (Exception ex) {
+            logger.error("transactionId: {} - Error getting all ChucVu! Rootcause: {}", transactionId, ex);
+            result = new Result(ResponseCode.SYSTEM.getCode(), false, ResponseCode.SYSTEM.getMessage());
+        }
+        resultExecute.put(Constant.RESPONSE_KEY.RESULT, result);
+        return resultExecute;
+    }
+
+    public Map<Object, Object> detail(String transactionId, ObjectId id) {
+        Map<Object, Object> resultExecute = new HashMap<>();
+        Result result = Result.OK();
+        try {
+            // Kiểm tra token
+            if (!jwtUtil.isAdminToken(jwtUtil.getToken(request))) {
+                result = new Result(ResponseCode.TOKEN_INVALID.getCode(), false, ResponseCode.TOKEN_INVALID.getMessage());
+                resultExecute.put(Constant.RESPONSE_KEY.RESULT, result);
+                return resultExecute;
+            }
+            chucVuRepository.findById(String.valueOf(id)).ifPresent(chucVu -> {
+                ChucVuResponse chucVuResponse = new ChucVuResponse();
+                chucVuResponse.setId(String.valueOf(chucVu.getId()));
+                chucVuResponse.setTenChucVu(chucVu.getTenChucVu());
+                resultExecute.put(Constant.RESPONSE_KEY.DATA, chucVuResponse);
+            });
+        } catch (Exception ex) {
+            logger.error("transactionId: {} - Error getting all ChucVu! Rootcause: {}", transactionId, ex);
+            result = new Result(ResponseCode.SYSTEM.getCode(), false, ResponseCode.SYSTEM.getMessage());
+        }
+        resultExecute.put(Constant.RESPONSE_KEY.RESULT, result);
+        return resultExecute;
+    }
+
+    public Map<Object, Object> update(String transactionId, ObjectId id, String title) {
+        Map<Object, Object> resultExecute = new HashMap<>();
+        Result result = Result.OK();
+        try {
+            // Kiểm tra token
+            if (!jwtUtil.isAdminToken(jwtUtil.getToken(request))) {
+                result = new Result(ResponseCode.TOKEN_INVALID.getCode(), false, ResponseCode.TOKEN_INVALID.getMessage());
+                resultExecute.put(Constant.RESPONSE_KEY.RESULT, result);
+                return resultExecute;
+            }
+            chucVuRepository.findById(String.valueOf(id)).ifPresent(chucVu -> {
+                chucVu.setTenChucVu(title);
+                chucVuRepository.save(chucVu);
+                ChucVuResponse chucVuResponse = new ChucVuResponse();
+                chucVuResponse.setId(String.valueOf(chucVu.getId()));
+                chucVuResponse.setTenChucVu(title);
+                resultExecute.put(Constant.RESPONSE_KEY.DATA, chucVuResponse);
+            });
+        } catch (Exception ex) {
+            logger.error("transactionId: {} - Error getting all ChucVu! Rootcause: {}", transactionId, ex);
+            result = new Result(ResponseCode.SYSTEM.getCode(), false, ResponseCode.SYSTEM.getMessage());
+        }
+        resultExecute.put(Constant.RESPONSE_KEY.RESULT, result);
+        return resultExecute;
+    }
+
+    public Map<Object, Object> delete(String transactionId, ObjectId id) {
+        Map<Object, Object> resultExecute = new HashMap<>();
+        Result result = Result.OK();
+        try {
+            // Kiểm tra token
+            if (!jwtUtil.isAdminToken(jwtUtil.getToken(request))) {
+                result = new Result(ResponseCode.TOKEN_INVALID.getCode(), false, ResponseCode.TOKEN_INVALID.getMessage());
+                resultExecute.put(Constant.RESPONSE_KEY.RESULT, result);
+                return resultExecute;
+            }
+            chucVuRepository.findById(String.valueOf(id)).ifPresent(chucVu -> {
+                chucVuRepository.delete(chucVu);
+                ChucVuResponse chucVuResponse = new ChucVuResponse();
+                chucVuResponse.setId(String.valueOf(chucVu.getId()));
+                chucVuResponse.setTenChucVu(chucVu.getTenChucVu());
+                resultExecute.put(Constant.RESPONSE_KEY.DATA, chucVuResponse);
+            });
         } catch (Exception ex) {
             logger.error("transactionId: {} - Error getting all ChucVu! Rootcause: {}", transactionId, ex);
             result = new Result(ResponseCode.SYSTEM.getCode(), false, ResponseCode.SYSTEM.getMessage());
