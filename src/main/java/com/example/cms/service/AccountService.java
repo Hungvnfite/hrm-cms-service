@@ -158,6 +158,7 @@ public class AccountService {
             userInfo.setGender(request.getGender());
             userInfo.setPhone(request.getPhone());
             userInfo.setEmail(request.getEmail());
+            userInfo.setNumberOfDaysOffRemaining(0.0);
             userInfo.setCreatedAt(DateUtil.genCreatedAt(null));
             userInfo.setUpdatedAt(DateUtil.genCreatedAt(null));
 
@@ -208,7 +209,10 @@ public class AccountService {
                     userInfoRepository.save(userInfo);
                 }
             }
-            resultExecute.put(Constant.RESPONSE_KEY.DATA, password.toString());
+            Map<String, String> mapData = new HashMap<>();
+            mapData.put("username", username);
+            mapData.put("password", password.toString());
+            resultExecute.put(Constant.RESPONSE_KEY.DATA, mapData);
         } catch (Exception ex) {
             logger.error("transactionId: {} - xảy ra ngoại lệ khi thực hiện thêm mới người dùng! Rootcause: {}", transactionId, ex);
             result = new Result(ResponseCode.SYSTEM.getCode(), false, ResponseCode.SYSTEM.getMessage());
@@ -231,6 +235,7 @@ public class AccountService {
             Account account = accountRepository.findById(String.valueOf(accountId)).orElse(null);
             if (account != null) {
                 account.setUpdatedAt(new Date().toString());
+                account.setTypeAccount(request.getTypeAccount());
 
                 UserInfo userInfo = userInfoRepository.findByUsernameAndIsDelete(account.getUsername(), false);
                 userInfo.setFullName(request.getFullName());
