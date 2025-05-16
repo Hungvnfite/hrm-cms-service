@@ -24,6 +24,7 @@ import java.security.MessageDigest;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -94,11 +95,36 @@ public class AuthService {
             Account account = accountRepository.findById(sessionData.getAccountId()).orElse(null);
             if (account != null) {
                 if (account.getIsFirstPassword()){
+//                    // Get an instance of MessageDigest for MD5
+//                    MessageDigest md = MessageDigest.getInstance("MD5");
+//
+//                    // Update digest with the input string
+//                    md.update(request.getPassword().getBytes());
+//
+//                    // Get the MD5 hash
+//                    byte[] mdBytes = md.digest();
+//
+//                    // Convert byte array to a hexadecimal string
+//                    String md5String = bytesToHex(mdBytes);
+//
+//                    // Hash mật khẩu bằng BCrypt
+//                    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+//                    account.setPassword(encoder.encode(md5String));
+                    // Chuỗi ký tự để tạo mật khẩu ngẫu nhiên
+                    String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+                    Random random = new Random();
+                    StringBuilder password = new StringBuilder(8);
+
+                    // Tạo chuỗi 8 ký tự ngẫu nhiên
+                    for (int i = 0; i < 8; i++) {
+                        password.append(characters.charAt(random.nextInt(characters.length())));
+                    }
+
                     // Get an instance of MessageDigest for MD5
                     MessageDigest md = MessageDigest.getInstance("MD5");
 
                     // Update digest with the input string
-                    md.update(request.getPassword().getBytes());
+                    md.update(password.toString().getBytes());
 
                     // Get the MD5 hash
                     byte[] mdBytes = md.digest();
@@ -112,7 +138,7 @@ public class AuthService {
                     account.setUpdatedAt(DateUtil.genCreatedAt(null));
                     account.setIsFirstPassword(false);
                     accountRepository.save(account);
-                    resultExecute.put(Constant.RESPONSE_KEY.DATA, "Đổi mật khẩu thành công");
+                    resultExecute.put(Constant.RESPONSE_KEY.DATA, password.toString());
                 }
             }
         } catch (Exception ex) {
