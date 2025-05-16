@@ -34,7 +34,7 @@ public class AuthController {
         return CompletableFuture.completedFuture(ResponseData.createResponse(authService.login(transactionId, request)));
     }
 
-    @PutMapping(value = "reset-password")
+    @PutMapping(value = "reset-password/{id}")
     public CompletableFuture<ResponseData> resetPassword(@NonNull @RequestHeader(Constant.TRANSACTION_ID_KEY) String transactionId,
                                                          @PathVariable("id") ObjectId id) {
 
