@@ -21,6 +21,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.security.MessageDigest;
 import java.util.Date;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ public class AuthService {
     private final AccountRepository accountRepository;
     private final RedissonService redissonService;
     private final JwtUtil jwtUtil;
+    private final HttpServletRequest request;
 
     public Map<Object, Object> login(String transactionId, LoginRequest request) {
         Map<Object, Object> resultExecute = new HashMap<>();
@@ -87,7 +89,8 @@ public class AuthService {
         Map<Object, Object> resultExecute = new HashMap<>();
         Result result = Result.OK();
         try {
-            if (jwtUtil.isTokenExpired(Utility.getSessionId())) {
+            // Kiểm tra token
+            if (!jwtUtil.isAdminToken(jwtUtil.getToken(request))) {
                 result = new Result(ResponseCode.TOKEN_INVALID.getCode(), false, ResponseCode.TOKEN_INVALID.getMessage());
                 resultExecute.put(Constant.RESPONSE_KEY.RESULT, result);
                 return resultExecute;
