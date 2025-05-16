@@ -3,14 +3,12 @@ package com.example.cms.service.auth;
 import com.example.cms.common.Constant;
 import com.example.cms.common.DateUtil;
 import com.example.cms.common.ResponseCode;
-import com.example.cms.common.Utility;
 import com.example.cms.config.JwtUtil;
 import com.example.cms.dao.Account;
 import com.example.cms.dto.base.Result;
 import com.example.cms.dto.model.LoginDTO;
 import com.example.cms.dto.model.SessionData;
 import com.example.cms.dto.request.LoginRequest;
-import com.example.cms.dto.request.ResetPasswordRequest;
 import com.example.cms.repository.AccountRepository;
 import com.example.cms.service.RedissonService;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.MessageDigest;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -49,7 +46,7 @@ public class AuthService {
                 if (isMatchesPassword) {
                     LoginDTO loginDTO = new LoginDTO();
                     loginDTO.setIsFirstPassword(account.getIsFirstPassword());
-                     if (account.getTypeAccount() == 1) {
+                    if (account.getTypeAccount() == 1) {
                         String accessToken = jwtUtil.generateAccessToken(Constant.ACCESS_STRING.concat(String.valueOf(account.getId())), account.getTypeAccount());
                         loginDTO.setAccessToken(accessToken);
                         String refreshToken = jwtUtil.generateRefreshToken(Constant.REFRESH_STRING.concat(String.valueOf(account.getId())));
@@ -97,7 +94,6 @@ public class AuthService {
             }
             Account account = accountRepository.findById(String.valueOf(id)).orElse(null);
             if (account != null) {
-                if (account.getIsFirstPassword()){
 //                    // Get an instance of MessageDigest for MD5
 //                    MessageDigest md = MessageDigest.getInstance("MD5");
 //
@@ -113,37 +109,36 @@ public class AuthService {
 //                    // Hash mật khẩu bằng BCrypt
 //                    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 //                    account.setPassword(encoder.encode(md5String));
-                    // Chuỗi ký tự để tạo mật khẩu ngẫu nhiên
-                    String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-                    Random random = new Random();
-                    StringBuilder password = new StringBuilder(8);
+                // Chuỗi ký tự để tạo mật khẩu ngẫu nhiên
+                String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+                Random random = new Random();
+                StringBuilder password = new StringBuilder(8);
 
-                    // Tạo chuỗi 8 ký tự ngẫu nhiên
-                    for (int i = 0; i < 8; i++) {
-                        password.append(characters.charAt(random.nextInt(characters.length())));
-                    }
-
-                    // Get an instance of MessageDigest for MD5
-                    MessageDigest md = MessageDigest.getInstance("MD5");
-
-                    // Update digest with the input string
-                    md.update(password.toString().getBytes());
-
-                    // Get the MD5 hash
-                    byte[] mdBytes = md.digest();
-
-                    // Convert byte array to a hexadecimal string
-                    String md5String = bytesToHex(mdBytes);
-
-                    // Hash mật khẩu bằng BCrypt
-                    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-                    account.setPassword(encoder.encode(md5String));
-                    account.setUpdatedAt(DateUtil.genCreatedAt(null));
-                    account.setIsFirstPassword(false);
-                    accountRepository.save(account);
-                    resultExecute.put(Constant.RESPONSE_KEY.DATA, password.toString());
+                // Tạo chuỗi 8 ký tự ngẫu nhiên
+                for (int i = 0; i < 8; i++) {
+                    password.append(characters.charAt(random.nextInt(characters.length())));
                 }
+
+                // Get an instance of MessageDigest for MD5
+                MessageDigest md = MessageDigest.getInstance("MD5");
+
+                // Update digest with the input string
+                md.update(password.toString().getBytes());
+
+                // Get the MD5 hash
+                byte[] mdBytes = md.digest();
+
+                // Convert byte array to a hexadecimal string
+                String md5String = bytesToHex(mdBytes);
+
+                // Hash mật khẩu bằng BCrypt
+                BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+                account.setPassword(encoder.encode(md5String));
+                account.setUpdatedAt(DateUtil.genCreatedAt(null));
+                accountRepository.save(account);
+                resultExecute.put(Constant.RESPONSE_KEY.DATA, password.toString());
             }
+
         } catch (Exception ex) {
             logger.error("transactionId: {} - xảy ra ngoại lệ khi thực hiện thay đổi mật khẩu! Rootcause: {}", transactionId, ex);
             result = new Result(ResponseCode.SYSTEM.getCode(), false, ResponseCode.SYSTEM.getMessage());
