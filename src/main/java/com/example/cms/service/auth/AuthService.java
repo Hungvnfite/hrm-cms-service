@@ -16,6 +16,7 @@ import com.example.cms.service.RedissonService;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bson.types.ObjectId;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -82,7 +83,7 @@ public class AuthService {
         return resultExecute;
     }
 
-    public Map<Object, Object> checkResetPassword(String transactionId, ResetPasswordRequest request) {
+    public Map<Object, Object> checkResetPassword(String transactionId, ObjectId id) {
         Map<Object, Object> resultExecute = new HashMap<>();
         Result result = Result.OK();
         try {
@@ -91,8 +92,7 @@ public class AuthService {
                 resultExecute.put(Constant.RESPONSE_KEY.RESULT, result);
                 return resultExecute;
             }
-            SessionData sessionData = redissonService.getSession(Utility.getSessionId());
-            Account account = accountRepository.findById(sessionData.getAccountId()).orElse(null);
+            Account account = accountRepository.findById(String.valueOf(id)).orElse(null);
             if (account != null) {
                 if (account.getIsFirstPassword()){
 //                    // Get an instance of MessageDigest for MD5

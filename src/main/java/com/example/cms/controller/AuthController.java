@@ -6,8 +6,10 @@ import com.example.cms.dto.request.LoginRequest;
 import com.example.cms.dto.request.ResetPasswordRequest;
 import com.example.cms.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,8 +36,8 @@ public class AuthController {
 
     @PutMapping(value = "reset-password")
     public CompletableFuture<ResponseData> resetPassword(@NonNull @RequestHeader(Constant.TRANSACTION_ID_KEY) String transactionId,
-                                                   @RequestBody ResetPasswordRequest request) {
+                                                         @PathVariable("id") ObjectId id) {
 
-        return CompletableFuture.completedFuture(ResponseData.createResponse(authService.checkResetPassword(transactionId, request)));
+        return CompletableFuture.completedFuture(ResponseData.createResponse(authService.checkResetPassword(transactionId, id)));
     }
 }
