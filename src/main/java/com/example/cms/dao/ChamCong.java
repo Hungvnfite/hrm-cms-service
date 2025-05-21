@@ -54,6 +54,11 @@ public class ChamCong {
     private String statusDetailOut = null;
 
     @Indexed
+    @Field(name = "STATUS_LATE_EARLY")
+    @ApiModelProperty(value = "Trạng thái xin đi muộn, về sớm của ngày hôm đấy", example = "0: Không xin, 1: Đi muộn, 2: Về sớm, 3: Cả 2")
+    private String statusLateEarly = "0";
+
+    @Indexed
     @Field(name = "PERIOD_CHECKIN")
     @ApiModelProperty(value = "Thời gian đi muộn", example = "30")
     private String periodIn = "0";

@@ -34,4 +34,14 @@ public class ChamCongController {
     ) {
         return CompletableFuture.completedFuture(ResponseData.createResponse(chamCongService.getList(transactionId, id, month, year)));
     }
+
+    @GetMapping(value = "cham-cong/sum/{id}")
+    public CompletableFuture<ResponseData> sum(
+            @NonNull @RequestHeader(Constant.TRANSACTION_ID_KEY) String transactionId,
+            @Nullable @PathVariable("id") ObjectId id,
+            @Nullable @RequestParam("month") String month,
+            @Nullable @RequestParam("year") String year
+    ) {
+        return CompletableFuture.completedFuture(ResponseData.createResponse(chamCongService.sum(transactionId, id, month, year)));
+    }
 }
