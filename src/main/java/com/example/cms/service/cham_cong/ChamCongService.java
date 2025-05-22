@@ -55,11 +55,16 @@ public class ChamCongService {
             LocalDateTime endOfMonth = yearMonth.atEndOfMonth().atTime(23, 59, 59);
             // Định dạng thành "Fri Mar 21 09:59:29 ICT 2025"
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+            DateTimeFormatter formatter1 = DateTimeFormatter.ofPattern("HH:mm");
 
             String startOfMonthStr = startOfMonth.minusDays(1).format(formatter);
             String endOfMonthStr = endOfMonth.plusDays(1).format(formatter);
             List<ChamCong> chamCongs = chamCongRepository.findAllByAccountIdAndIsDeleteAndCreatedAtBetweenOrderByCreatedAtAsc(id, false, startOfMonthStr, endOfMonthStr);
             List<ChamCongResponse> chamCongResponses = new ArrayList<>();
+            Double sum = 0.0;
+            Double tongQuenChamCong = 0.0;
+            Double congDuocTinhKhiQuenCham = 0.0;
+            Double tienDiMuonVeSom = 0.0;
             for (ChamCong chamCong : chamCongs) {
                 ChamCongResponse chamCongResponse = new ChamCongResponse();
                 chamCongResponse.setId(String.valueOf(chamCong.getId()));
@@ -79,8 +84,83 @@ public class ChamCongService {
                 chamCongResponse.setPeriodCheckout(chamCong.getPeriodOut());
                 chamCongResponse.setCreatedAt(chamCong.getCreatedAt());
                 chamCongResponses.add(chamCongResponse);
+
+                // chuẩn
+                if (chamCong.getStatus().equalsIgnoreCase("0") && chamCong.getStatusDetail().equalsIgnoreCase("0") && chamCong.getStatusDetailOut().equalsIgnoreCase("0")) {
+                    sum++;
+                }
+                if (chamCong.getStatusDetail().equalsIgnoreCase("1") || chamCong.getStatusDetailOut().equalsIgnoreCase("1")) {
+                    tongQuenChamCong++;
+                }
+                Double soTienMuonSom = 0.0;
+                if (chamCong.getStatusLateEarly().equalsIgnoreCase("1")) {
+                    if (chamCong.getCheckoutTime() != null) {
+                        LocalTime checkInTime = LocalTime.parse(chamCong.getCheckoutTime().trim(), formatter1);
+                        if (chamCong.getPeriodOut() != null) {
+                            if (checkInTime.isBefore(LocalTime.parse("17:00", formatter1))) {
+                                Double soPhutDiMuon = convertTimeToMinutes(chamCong.getPeriodOut().trim());
+                                soTienMuonSom = soTienMuonSom + soPhutDiMuon;
+                            }
+                        }
+                    }
+                    tienDiMuonVeSom += soTienMuonSom;
+                }
+                if (chamCong.getStatusLateEarly().equalsIgnoreCase("2")){
+                    if (chamCong.getCheckinTime() != null) {
+                        LocalTime checkInTime = LocalTime.parse(chamCong.getCheckinTime().trim(), formatter1);
+                        if (chamCong.getPeriodIn() != null) {
+                            Double soPhutDiMuon = convertTimeToMinutes(chamCong.getPeriodIn().trim());
+                            if (checkInTime.isAfter(LocalTime.parse("08:05", formatter1)) && checkInTime.isBefore(LocalTime.parse("08:16", formatter1))) {
+                                soTienMuonSom = soPhutDiMuon;
+                            }
+                            if (checkInTime.isAfter(LocalTime.parse("08:15", formatter1)) && checkInTime.isBefore(LocalTime.parse("08:31", formatter1))) {
+                                soTienMuonSom = ((soPhutDiMuon - 10) * 5) + 10;
+                            }
+                            if (checkInTime.isAfter(LocalTime.parse("08:30", formatter1)) && checkInTime.isBefore(LocalTime.parse("09:01", formatter1))) {
+                                soTienMuonSom = ((soPhutDiMuon - 25) * 10) + 85;
+                            }
+                        }
+                    }
+                    tienDiMuonVeSom += soTienMuonSom;
+                }
+                if (chamCong.getStatusLateEarly().equalsIgnoreCase("0")){
+                    if (chamCong.getCheckinTime() != null) {
+                        LocalTime checkInTime = LocalTime.parse(chamCong.getCheckinTime().trim(), formatter1);
+                        if (chamCong.getPeriodIn() != null) {
+                            Double soPhutDiMuon = convertTimeToMinutes(chamCong.getPeriodIn().trim());
+                            if (checkInTime.isAfter(LocalTime.parse("08:05", formatter1)) && checkInTime.isBefore(LocalTime.parse("08:16", formatter1))) {
+                                soTienMuonSom = soPhutDiMuon;
+                            }
+                            if (checkInTime.isAfter(LocalTime.parse("08:15", formatter1)) && checkInTime.isBefore(LocalTime.parse("08:31", formatter1))) {
+                                soTienMuonSom = ((soPhutDiMuon - 10) * 5) + 10;
+                            }
+                            if (checkInTime.isAfter(LocalTime.parse("08:30", formatter1)) && checkInTime.isBefore(LocalTime.parse("09:01", formatter1))) {
+                                soTienMuonSom = ((soPhutDiMuon - 25) * 10) + 85;
+                            }
+                        }
+                    }
+                    if (chamCong.getCheckoutTime() != null) {
+                        LocalTime checkInTime = LocalTime.parse(chamCong.getCheckoutTime().trim(), formatter1);
+                        if (chamCong.getPeriodOut() != null) {
+                            if (checkInTime.isBefore(LocalTime.parse("17:00", formatter1))) {
+                                Double soPhutDiMuon = convertTimeToMinutes(chamCong.getPeriodOut().trim());
+                                soTienMuonSom = soTienMuonSom + soPhutDiMuon;
+                            }
+                        }
+                    }
+                    tienDiMuonVeSom += soTienMuonSom;
+                }
+                if (tongQuenChamCong >= 3) {
+                    congDuocTinhKhiQuenCham = (tongQuenChamCong - 3) / 2;
+                    sum = sum + tongQuenChamCong;
+                }
             }
-            resultExecute.put(Constant.RESPONSE_KEY.DATA, chamCongResponses);
+            Map<Object, Object> data = new HashMap<>();
+            data.put("chamCongResponses", chamCongResponses);
+            data.put("actualWorkingDay", sum - congDuocTinhKhiQuenCham);
+            data.put("fineMoney", tienDiMuonVeSom);
+            resultExecute.put(Constant.RESPONSE_KEY.DATA, data);
+//            resultExecute.put(Constant.RESPONSE_KEY.DATA, chamCongResponses);
         } catch (Exception ex) {
             logger.error("transactionId: {} - xảy ra ngoại lệ khi thực hiện thêm mới người dùng! Rootcause: {}", transactionId, ex);
             result = new Result(ResponseCode.SYSTEM.getCode(), false, ResponseCode.SYSTEM.getMessage());
