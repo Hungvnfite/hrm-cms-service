@@ -55,7 +55,7 @@ public class ChamCong {
 
     @Indexed
     @Field(name = "STATUS_LATE_EARLY")
-    @ApiModelProperty(value = "Trạng thái xin đi muộn, về sớm của ngày hôm đấy", example = "0: Không xin, 1: Đi muộn, 2: Về sớm, 3: Cả 2")
+    @ApiModelProperty(value = "Trạng thái xin đi muộn, về sớm, về sớm của ngày hôm đấy", example = "0: Chấp nhận cả 2, 1: Từ chối cả 2, 3: Chấp nhận đi muộn, 4: Chấp nhận về sớm, 5: Từ chối đi muộn, 6: Từ chối về sớm, 7: Chấp nhận đi muộn - Từ chối về sớm, 8: Chấp nhận về sớm - Từ chối đi muộn")
     private String statusLateEarly = "0";
 
     @Indexed

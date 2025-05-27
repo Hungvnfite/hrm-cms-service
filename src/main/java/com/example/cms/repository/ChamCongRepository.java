@@ -12,5 +12,5 @@ import java.util.Optional;
 public interface ChamCongRepository extends MongoRepository<ChamCong, String> {
 
     List<ChamCong> findAllByAccountIdAndIsDeleteAndCreatedAtBetweenOrderByCreatedAtAsc(ObjectId accountId, Boolean isDelete, String createdAt, String createdAt2);
-
+    ChamCong findByAccountIdAndIsDeleteAndCreatedAt(ObjectId accountId, Boolean isDelete, String createdAt);
 }

@@ -93,19 +93,48 @@ public class ChamCongService {
                     tongQuenChamCong++;
                 }
                 Double soTienMuonSom = 0.0;
-                if (chamCong.getStatusLateEarly().equalsIgnoreCase("1")) {
-                    if (chamCong.getCheckoutTime() != null) {
-                        LocalTime checkInTime = LocalTime.parse(chamCong.getCheckoutTime().trim(), formatter1);
-                        if (chamCong.getPeriodOut() != null) {
-                            if (checkInTime.isBefore(LocalTime.parse("17:00", formatter1))) {
-                                Double soPhutDiMuon = convertTimeToMinutes(chamCong.getPeriodOut().trim());
-                                soTienMuonSom = soTienMuonSom + soPhutDiMuon;
+//                if (chamCong.getStatusDetail().equalsIgnoreCase("1")) {
+//                    if (chamCong.getCheckoutTime() != null) {
+//                        LocalTime checkInTime = LocalTime.parse(chamCong.getCheckoutTime().trim(), formatter1);
+//                        if (chamCong.getPeriodOut() != null) {
+//                            if (checkInTime.isBefore(LocalTime.parse("17:00", formatter1))) {
+//                                Double soPhutDiMuon = convertTimeToMinutes(chamCong.getPeriodOut().trim());
+//                                soTienMuonSom = soTienMuonSom + soPhutDiMuon;
+//                            }
+//                        }
+//                    }
+//                    tienDiMuonVeSom += soTienMuonSom;
+//                }
+                if (chamCong.getStatusLateEarly().equalsIgnoreCase("1")){
+//                    if (chamCong.getStatusDetail().equalsIgnoreCase("1") && chamCong.getStatusDetailOut().equalsIgnoreCase("1")) {
+                        if (chamCong.getCheckinTime() != null) {
+                            LocalTime checkInTime = LocalTime.parse(chamCong.getCheckinTime().trim(), formatter1);
+                            if (chamCong.getPeriodIn() != null) {
+                                Double soPhutDiMuon = convertTimeToMinutes(chamCong.getPeriodIn().trim());
+                                if (checkInTime.isAfter(LocalTime.parse("08:05", formatter1)) && checkInTime.isBefore(LocalTime.parse("08:16", formatter1))) {
+                                    soTienMuonSom = soPhutDiMuon;
+                                }
+                                if (checkInTime.isAfter(LocalTime.parse("08:15", formatter1)) && checkInTime.isBefore(LocalTime.parse("08:31", formatter1))) {
+                                    soTienMuonSom = ((soPhutDiMuon - 10) * 5) + 10;
+                                }
+                                if (checkInTime.isAfter(LocalTime.parse("08:30", formatter1)) && checkInTime.isBefore(LocalTime.parse("09:01", formatter1))) {
+                                    soTienMuonSom = ((soPhutDiMuon - 25) * 10) + 85;
+                                }
                             }
                         }
-                    }
-                    tienDiMuonVeSom += soTienMuonSom;
+                        if (chamCong.getCheckoutTime() != null) {
+                            LocalTime checkInTime = LocalTime.parse(chamCong.getCheckoutTime().trim(), formatter1);
+                            if (chamCong.getPeriodOut() != null) {
+                                if (checkInTime.isBefore(LocalTime.parse("17:00", formatter1))) {
+                                    Double soPhutDiMuon = convertTimeToMinutes(chamCong.getPeriodOut().trim());
+                                    soTienMuonSom = soTienMuonSom + soPhutDiMuon;
+                                }
+                            }
+                        }
+                        tienDiMuonVeSom += soTienMuonSom;
+//                    }
                 }
-                if (chamCong.getStatusLateEarly().equalsIgnoreCase("2")){
+                if (chamCong.getStatusLateEarly().equalsIgnoreCase("5")) {
                     if (chamCong.getCheckinTime() != null) {
                         LocalTime checkInTime = LocalTime.parse(chamCong.getCheckinTime().trim(), formatter1);
                         if (chamCong.getPeriodIn() != null) {
@@ -123,7 +152,31 @@ public class ChamCongService {
                     }
                     tienDiMuonVeSom += soTienMuonSom;
                 }
-                if (chamCong.getStatusLateEarly().equalsIgnoreCase("0")){
+                if (chamCong.getStatusLateEarly().equalsIgnoreCase("6")){
+                    if (chamCong.getCheckoutTime() != null) {
+                        LocalTime checkInTime = LocalTime.parse(chamCong.getCheckoutTime().trim(), formatter1);
+                        if (chamCong.getPeriodOut() != null) {
+                            if (checkInTime.isBefore(LocalTime.parse("17:00", formatter1))) {
+                                Double soPhutDiMuon = convertTimeToMinutes(chamCong.getPeriodOut().trim());
+                                soTienMuonSom = soTienMuonSom + soPhutDiMuon;
+                            }
+                        }
+                    }
+                    tienDiMuonVeSom += soTienMuonSom;
+                }
+                if (chamCong.getStatusLateEarly().equalsIgnoreCase("7")){
+                    if (chamCong.getCheckoutTime() != null) {
+                        LocalTime checkInTime = LocalTime.parse(chamCong.getCheckoutTime().trim(), formatter1);
+                        if (chamCong.getPeriodOut() != null) {
+                            if (checkInTime.isBefore(LocalTime.parse("17:00", formatter1))) {
+                                Double soPhutDiMuon = convertTimeToMinutes(chamCong.getPeriodOut().trim());
+                                soTienMuonSom = soTienMuonSom + soPhutDiMuon;
+                            }
+                        }
+                    }
+                    tienDiMuonVeSom += soTienMuonSom;
+                }
+                if (chamCong.getStatusLateEarly().equalsIgnoreCase("8")){
                     if (chamCong.getCheckinTime() != null) {
                         LocalTime checkInTime = LocalTime.parse(chamCong.getCheckinTime().trim(), formatter1);
                         if (chamCong.getPeriodIn() != null) {
@@ -139,17 +192,26 @@ public class ChamCongService {
                             }
                         }
                     }
-                    if (chamCong.getCheckoutTime() != null) {
-                        LocalTime checkInTime = LocalTime.parse(chamCong.getCheckoutTime().trim(), formatter1);
-                        if (chamCong.getPeriodOut() != null) {
-                            if (checkInTime.isBefore(LocalTime.parse("17:00", formatter1))) {
-                                Double soPhutDiMuon = convertTimeToMinutes(chamCong.getPeriodOut().trim());
-                                soTienMuonSom = soTienMuonSom + soPhutDiMuon;
-                            }
-                        }
-                    }
                     tienDiMuonVeSom += soTienMuonSom;
                 }
+//                if (chamCong.getStatusDetailOut().equalsIgnoreCase("1")) {
+//                    if (chamCong.getCheckinTime() != null) {
+//                        LocalTime checkInTime = LocalTime.parse(chamCong.getCheckinTime().trim(), formatter1);
+//                        if (chamCong.getPeriodIn() != null) {
+//                            Double soPhutDiMuon = convertTimeToMinutes(chamCong.getPeriodIn().trim());
+//                            if (checkInTime.isAfter(LocalTime.parse("08:05", formatter1)) && checkInTime.isBefore(LocalTime.parse("08:16", formatter1))) {
+//                                soTienMuonSom = soPhutDiMuon;
+//                            }
+//                            if (checkInTime.isAfter(LocalTime.parse("08:15", formatter1)) && checkInTime.isBefore(LocalTime.parse("08:31", formatter1))) {
+//                                soTienMuonSom = ((soPhutDiMuon - 10) * 5) + 10;
+//                            }
+//                            if (checkInTime.isAfter(LocalTime.parse("08:30", formatter1)) && checkInTime.isBefore(LocalTime.parse("09:01", formatter1))) {
+//                                soTienMuonSom = ((soPhutDiMuon - 25) * 10) + 85;
+//                            }
+//                        }
+//                    }
+//                    tienDiMuonVeSom += soTienMuonSom;
+//                }
                 if (tongQuenChamCong >= 3) {
                     congDuocTinhKhiQuenCham = (tongQuenChamCong - 3) / 2;
                     sum = sum + tongQuenChamCong;
@@ -160,7 +222,6 @@ public class ChamCongService {
             data.put("actualWorkingDay", sum - congDuocTinhKhiQuenCham);
             data.put("fineMoney", tienDiMuonVeSom);
             resultExecute.put(Constant.RESPONSE_KEY.DATA, data);
-//            resultExecute.put(Constant.RESPONSE_KEY.DATA, chamCongResponses);
         } catch (Exception ex) {
             logger.error("transactionId: {} - xảy ra ngoại lệ khi thực hiện thêm mới người dùng! Rootcause: {}", transactionId, ex);
             result = new Result(ResponseCode.SYSTEM.getCode(), false, ResponseCode.SYSTEM.getMessage());
@@ -214,7 +275,7 @@ public class ChamCongService {
                     }
                     tienDiMuonVeSom += soTienMuonSom;
                 }
-                if (chamCong.getStatusLateEarly().equalsIgnoreCase("2")){
+                if (chamCong.getStatusLateEarly().equalsIgnoreCase("2")) {
                     if (chamCong.getCheckinTime() != null) {
                         LocalTime checkInTime = LocalTime.parse(chamCong.getCheckinTime().trim(), formatter1);
                         if (chamCong.getPeriodIn() != null) {
@@ -232,7 +293,7 @@ public class ChamCongService {
                     }
                     tienDiMuonVeSom += soTienMuonSom;
                 }
-                if (chamCong.getStatusLateEarly().equalsIgnoreCase("0")){
+                if (chamCong.getStatusLateEarly().equalsIgnoreCase("0")) {
                     if (chamCong.getCheckinTime() != null) {
                         LocalTime checkInTime = LocalTime.parse(chamCong.getCheckinTime().trim(), formatter1);
                         if (chamCong.getPeriodIn() != null) {
