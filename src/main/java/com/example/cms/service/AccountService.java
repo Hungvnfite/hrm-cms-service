@@ -659,6 +659,7 @@ public class AccountService {
 
                                 accountInfoDTO.setMaNv(account.getMaNv());
                                 accountInfoDTO.setFullName(account.getFullName());
+                                accountInfoDTO.setUserName(account.getUsername());
                                 accountInfoDTO.setTypeAccount(account1.getTypeAccount());
 
                                 // Lấy thông tin phòng ban, chức vụ, trạng thái làm việc
