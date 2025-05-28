@@ -10,6 +10,8 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.util.List;
+
 @Document(collection = "tbl_di_som_ve_muon")
 @Data
 @AllArgsConstructor
@@ -35,6 +37,22 @@ public class DiSomVeMuon {
     @Field(name = "STATUS_RESULT_LATE_EARLY")
     @ApiModelProperty(value = "Trạng thái xin đi muộn, về sớm của ngày hôm đấy", example = "0: Đang chờ duyệt, 1: Chấp nhận, 2: Từ chối")
     private String statusResultLateEarly = "0";
+
+    @Indexed
+    @Field(name = "MANAGERS")
+    private List<ObjectId> managers;
+
+    @Indexed
+    @Field(name = "DATE_LATE_EARLY")
+    private String dateLateEarly;
+
+    @Indexed
+    @Field(name = "TIME_LATE_EARLY")
+    private Integer timeLateEarly;
+
+    @Indexed
+    @Field(name = "NOTES")
+    private String notes;
 
     @Indexed
     @Field(name = "CREATED_AT")

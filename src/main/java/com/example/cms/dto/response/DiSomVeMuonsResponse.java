@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class NghiPhepsResponse{
-    private List<NghiPhepResponse> resultData;
+public class DiSomVeMuonsResponse {
+    private List<DiSomVeMuonResponse> resultData;
     private Integer totalRecords;
 }

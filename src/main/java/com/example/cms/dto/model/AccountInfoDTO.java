@@ -8,11 +8,12 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class AccountInfoDTO {
+public class  AccountInfoDTO {
 
     private String accountId;
     private String maNv;
     private String fullName;
+    private String userName;
     private ChucVuResponse chucVu;
     private PhongBanResponse phongBan;
     private String soCCCD;

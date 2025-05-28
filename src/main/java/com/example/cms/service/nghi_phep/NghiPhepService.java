@@ -27,7 +27,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -118,7 +117,7 @@ public class NghiPhepService {
                             return nghiPhepResponse;
                         }).collect(Collectors.toList());
                 NghiPhepsResponse nghiPhepsResponse = new NghiPhepsResponse();
-                nghiPhepsResponse.setNghiPhepResponses(nghiPhepResponses);
+                nghiPhepsResponse.setResultData(nghiPhepResponses);
                 nghiPhepsResponse.setTotalRecords((int) nghiPheps.getTotalElements());
                 resultExecute.put(Constant.RESPONSE_KEY.DATA, nghiPhepsResponse);
             }
