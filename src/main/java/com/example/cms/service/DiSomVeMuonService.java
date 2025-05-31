@@ -120,9 +120,17 @@ public class DiSomVeMuonService {
                 resultExecute.put(Constant.RESPONSE_KEY.RESULT, result);
                 return resultExecute;
             }
+
             diSomVeMuonRepository.findById(String.valueOf(id)).ifPresent(dsvm -> {
                 if (!type.equalsIgnoreCase("0") && dsvm.getStatusResultLateEarly().equalsIgnoreCase("0")) {
                     ChamCong chamCong = chamCongRepository.findByAccountIdAndIsDeleteAndCreatedAt(dsvm.getAccountId(), false, dsvm.getDateLateEarly());
+                    if (chamCong == null){
+                        chamCong = new ChamCong();
+                        chamCong.setAccountId(dsvm.getAccountId());
+                        chamCong.setStatusLateEarly("1");
+                        chamCong.setCreatedAt(dsvm.getDateLateEarly());
+                        chamCong = chamCongRepository.save(chamCong);
+                    }
                     if (chamCong != null) {
                         if (type.equalsIgnoreCase("1")) {
                             if (chamCong.getStatusLateEarly().equalsIgnoreCase("3") || chamCong.getStatusLateEarly().equalsIgnoreCase("4")) {
