@@ -1,6 +1,15 @@
 server:
   port: 2308
 spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ecommercedemo47@gmail.com
+    password: kjiretscnvezdtql
+    protocol : smtp
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
   application:
     name: hrm-service-cms
     domain: http://14.224.135.196

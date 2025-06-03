@@ -42,6 +42,10 @@ public class Account {
     private Boolean isFirstPassword;
 
     @Indexed
+    @Field(name = "IS_FORGOTTEN")
+    private Boolean isForgotten;
+
+    @Indexed
     @Field(name = "CREATED_AT")
     private String createdAt;
 
