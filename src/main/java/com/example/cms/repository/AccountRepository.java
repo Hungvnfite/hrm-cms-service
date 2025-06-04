@@ -19,4 +19,5 @@ public interface AccountRepository extends MongoRepository<Account, String> {
 
     Page<Account> findAllByIsDeleteOrderByCreatedAt(Boolean isDelete, Pageable pageable);
 
+    List<Account> findByIsForgottenTrue();
 }

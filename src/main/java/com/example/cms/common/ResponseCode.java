@@ -11,7 +11,12 @@ public enum ResponseCode {
     LG_WRONG_USER("ERR_001_2005", "Sai thông tin tài khoản/ mật khẩu"),
 
     AUTHOR_NOT_ALLOW("ERR_001_2006", "Không đủ quyền để thực hiện thao tác"),
-    ERROR_CANCEL_LEAVE("ERR_001_2007", "Bạn không thể hành động do đơn đã hủy!");
+    ERROR_CANCEL_LEAVE("ERR_001_2007", "Bạn không thể hành động do đơn đã hủy!"),
+
+    //Cấp mật khẩu
+    ERROR_REISSUE_LOST_PASSWORD("ERR_001_2008", "Không hợp lệ! Tài khoản không yêu cầu cấp phát mật khẩu mới"),
+    DOES_NOT_EXIST_ACCOUNT("ERR_001_2009", "Tài khoản không tồn tại!")
+    ;
 
     private String code;
     private String message;

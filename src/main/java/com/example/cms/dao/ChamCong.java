@@ -41,22 +41,22 @@ public class ChamCong {
     @Indexed
     @Field(name = "STATUS")
     @ApiModelProperty(value = "Trạng thái chấm công của ngày hôm đấy", example = "0: Hợp lệ, 1: Quên chấm công đến, 2:Quên chấm công về, 3:Thất bại")
-    private String status;
+    private String status = "3";
 
     @Indexed
     @Field(name = "STATUS_DETAIL")
     @ApiModelProperty(value = "Trạng thái chấm công của ngày hôm đấy", example = "0: Hợp lệ, 1: Đi muộn, 2: Thất bại")
-    private String statusDetail = null;
+    private String statusDetail = "2";
 
     @Indexed
     @Field(name = "STATUS_DETAIL_OUT")
     @ApiModelProperty(value = "Trạng thái chấm công của ngày hôm đấy", example = "0: Hợp lệ, 1: Về sớm,2: Thất bại")
-    private String statusDetailOut = null;
+    private String statusDetailOut = "2";
 
     @Indexed
     @Field(name = "STATUS_LATE_EARLY")
     @ApiModelProperty(value = "Trạng thái xin đi muộn, về sớm, về sớm của ngày hôm đấy", example = "0: Chấp nhận cả 2, 1: Từ chối cả 2, 3: Chấp nhận đi muộn, 4: Chấp nhận về sớm, 5: Từ chối đi muộn, 6: Từ chối về sớm, 7: Chấp nhận đi muộn - Từ chối về sớm, 8: Chấp nhận về sớm - Từ chối đi muộn")
-    private String statusLateEarly = "0";
+    private String statusLateEarly = "1";
 
     @Indexed
     @Field(name = "PERIOD_CHECKIN")
