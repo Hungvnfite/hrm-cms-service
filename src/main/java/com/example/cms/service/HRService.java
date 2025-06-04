@@ -82,16 +82,10 @@ public class HRService {
         try {
             Account account = accountRepository.findTopByUsernameAndIsDelete(request.getUsername(),false);
             if (account != null && account.getIsForgotten()) {
-                // Get an instance of MessageDigest for MD5
+
                 MessageDigest md = MessageDigest.getInstance("MD5");
-
-                // Update digest with the input string
                 md.update(request.getNewPassword().getBytes());
-
-                // Get the MD5 hash
                 byte[] mdBytes = md.digest();
-
-                // Convert byte array to a hexadecimal string
                 String md5String = bytesToHex(mdBytes);
 
                 // Hash mật khẩu bằng BCrypt
