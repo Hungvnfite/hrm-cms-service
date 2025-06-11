@@ -46,6 +46,10 @@ public class UserInfo {
     private String avatarUrl;
 
     @Indexed
+    @Field(name = "AVATAR_ID")
+    private String avatarId;
+
+    @Indexed
     @Field(name = "ID_PHONG_BAN")
     private ObjectId idPhongBan;
 

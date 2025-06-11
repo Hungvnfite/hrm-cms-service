@@ -2,6 +2,7 @@ package com.example.cms.service;
 
 import com.example.cms.common.Constant;
 import com.example.cms.common.DateUtil;
+import com.example.cms.common.FileUtil;
 import com.example.cms.common.ResponseCode;
 import com.example.cms.config.JwtUtil;
 import com.example.cms.dao.Account;
@@ -13,13 +14,11 @@ import com.example.cms.dao.UserInfo;
 import com.example.cms.dto.base.Result;
 import com.example.cms.dto.model.AccountInfoDTO;
 import com.example.cms.dto.model.AccountsDTO;
+import com.example.cms.dto.model.FileDto;
 import com.example.cms.dto.request.CreateAccountInfoCrmRequest;
 import com.example.cms.dto.request.CreateAccountInfoRequest;
 import com.example.cms.dto.request.CrmVerifyCreateRequest;
-import com.example.cms.dto.response.CRMResponseDataDTO;
-import com.example.cms.dto.response.ChucVuResponse;
-import com.example.cms.dto.response.PhongBanResponse;
-import com.example.cms.dto.response.TrangThaiLamViecResponse;
+import com.example.cms.dto.response.*;
 import com.example.cms.feign.CRMService;
 import com.example.cms.repository.AccountRepository;
 import com.example.cms.repository.ChucVuRepository;
@@ -92,6 +91,8 @@ public class AccountService {
     private final ChucVuRepository chucVuRepository;
     private final HoSoRepository hoSoRepository;
     private final HttpServletRequest request;
+    private final FileUtil fileUtil;
+
 
     public Map<Object, Object> createAccount(String transactionId, String userRequest, MultipartFile avatar, List<MultipartFile> files) {
         Map<Object, Object> resultExecute = new HashMap<>();
@@ -146,12 +147,7 @@ public class AccountService {
             userInfo.setIdPhongBan(request.getIdPhongBan());
             userInfo.setIdChucVu(request.getIdChucVu());
             userInfo.setIdTrangThai(request.getIdTrangThai());
-            String folderNameAvt = folderImgAvt;
-            File fileAvt = new File(folderNameAvt);
-            if (!fileAvt.exists()) fileAvt.mkdir();
-            String folderNameFile = folderImgFile;
-            File fileFile = new File(folderNameFile);
-            if (!fileFile.exists()) fileFile.mkdir();
+
             List<ObjectId> hoSoIDs = new ArrayList<>();
             userInfo.setSoCCCD(request.getSoCCCD());
             userInfo.setWorkStartDate(request.getWorkStartDate().toString());
@@ -171,6 +167,7 @@ public class AccountService {
             createAccountInfoCrmRequest.setPosition(chucVuRepository.findById(String.valueOf(request.getIdChucVu())).get().getTenChucVu());
             createAccountInfoCrmRequest.setWorkingStatus(trangThaiLamViecRepository.findById(String.valueOf(request.getIdTrangThai())).get().getTenTrangThai());
             createAccountInfoCrmRequest.setDepartment(phongBanRepository.findById(String.valueOf(request.getIdPhongBan())).get().getTenPhongBan());
+
             String data = crmService.genToken(createAccountInfoCrmRequest);
             ObjectMapper objectMapper = new ObjectMapper();
             CRMResponseDataDTO response = objectMapper.readValue(data, CRMResponseDataDTO.class);
@@ -181,32 +178,32 @@ public class AccountService {
                 ObjectMapper objectMapper1 = new ObjectMapper();
                 CRMResponseDataDTO response1 = objectMapper1.readValue(data1, CRMResponseDataDTO.class);
                 if (response1.getCode().equalsIgnoreCase("200")) {
-                    // Lấy tên gốc của file và tạo tên duy nhất
-                    String originalFilename = Objects.requireNonNull(avatar.getOriginalFilename());
-                    String uniqueFilename = getUniqueFilename(folderNameAvt, originalFilename);
-                    String avatarUrl = saveImage(folderNameAvt, avatar, uniqueFilename);
-                    if (StringUtils.isNotEmpty(avatarUrl)) {
-                        userInfo.setAvatarUrl(Constant.URL_IMG_AVATAR.concat(uniqueFilename));
+                    //lưu mới
+                    List<String> mappings = new ArrayList<>();
+                    for(MultipartFile file : files){
+                        String mappingImgId = Constant.HRM.concat(username.concat(Objects.requireNonNull(file.getOriginalFilename())));
+                        mappings.add(mappingImgId);
                     }
-                    for (MultipartFile file : files) {
-                        HoSo hoSo = new HoSo();
-                        // Lấy tên gốc của file và tạo tên duy nhất
-                        String originalFilename1 = Objects.requireNonNull(file.getOriginalFilename());
-                        String uniqueFilename1 = getUniqueFilename(folderNameFile, originalFilename1);
-                        saveImage(folderNameFile, file, uniqueFilename1);
-                        hoSo.setName(uniqueFilename1);
-                        hoSo.setPath(Constant.URL_IMG_FILE.concat(uniqueFilename1));
-                        hoSo.setCreatedAt(DateUtil.genCreatedAt(null));
-                        hoSo.setUpdatedAt(DateUtil.genCreatedAt(null));
-                        hoSo.setType(getFileExtension(Objects.requireNonNull(uniqueFilename1)));
-                        String unit = convertMultipartFileToUnit(file);
-                        hoSo.setCapacity(unit);
-                        hoSoRepository.save(hoSo);
-                        hoSoIDs.add(hoSo.getId());
+                    files.add(avatar);
+                    mappings.add(Constant.HRM.concat(username.concat(Objects.requireNonNull(avatar.getOriginalFilename()))));
+                    FileResponse fileResponse = fileUtil.writeFile(files, mappings);
+
+                    if (fileResponse.getSuccess()  && !fileResponse.getFiles().isEmpty()) {
+                        for (int i = 0; i < fileResponse.getFiles().size() - 1; i++) {
+                            HoSo hoSo = new HoSo();
+                            hoSo.setImageId(fileResponse.getFiles().get(i).getFileId());
+                            hoSo.setType(fileResponse.getFiles().get(i).getType());
+                            hoSoRepository.save(hoSo);
+                            hoSoIDs.add(hoSo.getId());
+                        }
+                        if(!avatar.isEmpty()){
+                            userInfo.setAvatarId(fileResponse.getFiles().get(fileResponse.getFiles().size()-1).getFileId());
+                        }
+                        userInfo.setIdHoSo(hoSoIDs);
+                        accountRepository.save(account);
+                        userInfoRepository.save(userInfo);
                     }
-                    userInfo.setIdHoSo(hoSoIDs);
-                    accountRepository.save(account);
-                    userInfoRepository.save(userInfo);
+
                 }
             }
             Map<String, String> mapData = new HashMap<>();
