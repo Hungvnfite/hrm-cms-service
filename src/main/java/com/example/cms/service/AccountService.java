@@ -426,15 +426,6 @@ public class AccountService {
                             }
                         }
                     }
-                } else {
-                    // Nếu người dùng đã xoá hết files + avatar
-                    if (userInfo.getIdHoSo() != null) {
-                        for (ObjectId id : userInfo.getIdHoSo()) {
-                            hoSoRepository.deleteById(String.valueOf(id));
-                        }
-                    }
-                    hoSoIDs.clear();
-                    userInfo.setAvatarId(null);
                 }
 
                 userInfo.setIdHoSo(hoSoIDs);
