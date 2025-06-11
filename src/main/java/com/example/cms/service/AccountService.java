@@ -193,6 +193,8 @@ public class AccountService {
                             HoSo hoSo = new HoSo();
                             hoSo.setImageId(fileResponse.getFiles().get(i).getFileId());
                             hoSo.setType(fileResponse.getFiles().get(i).getType());
+                            hoSo.setCreatedAt(DateUtil.genCreatedAt(null));
+                            hoSo.setUpdatedAt(DateUtil.genCreatedAt(null));
                             hoSoRepository.save(hoSo);
                             hoSoIDs.add(hoSo.getId());
                         }
@@ -203,7 +205,6 @@ public class AccountService {
                         accountRepository.save(account);
                         userInfoRepository.save(userInfo);
                     }
-
                 }
             }
             Map<String, String> mapData = new HashMap<>();
@@ -241,12 +242,12 @@ public class AccountService {
                 userInfo.setIdPhongBan(request.getIdPhongBan());
                 userInfo.setIdChucVu(request.getIdChucVu());
                 userInfo.setIdTrangThai(request.getIdTrangThai());
-                String folderNameAvt = folderImgAvt;
-                File fileAvt = new File(folderNameAvt);
-                if (!fileAvt.exists()) fileAvt.mkdir();
-                String folderNameFile = folderImgFile;
-                File fileFile = new File(folderNameFile);
-                if (!fileFile.exists()) fileFile.mkdir();
+//                String folderNameAvt = folderImgAvt;
+//                File fileAvt = new File(folderNameAvt);
+//                if (!fileAvt.exists()) fileAvt.mkdir();
+//                String folderNameFile = folderImgFile;
+//                File fileFile = new File(folderNameFile);
+//                if (!fileFile.exists()) fileFile.mkdir();
                 userInfo.setSoCCCD(request.getSoCCCD());
                 userInfo.setWorkStartDate(request.getWorkStartDate().toString());
                 userInfo.setGender(request.getGender());
@@ -255,124 +256,187 @@ public class AccountService {
                 userInfo.setCreatedAt(DateUtil.genCreatedAt(null));
                 userInfo.setUpdatedAt(DateUtil.genCreatedAt(null));
 
-                // Lấy tên gốc của file và tạo tên duy nhất
-                if (avatar != null) {
-                    String originalFilename = Objects.requireNonNull(avatar.getOriginalFilename());
-                    if (!Constant.URL_IMG_AVATAR.concat(originalFilename).equals(userInfo.getAvatarUrl())) {
-                        String uniqueFilename = getUniqueFilename(folderNameAvt, originalFilename);
-                        String avatarUrl = saveImage(folderNameAvt, avatar, uniqueFilename);
-                        if (StringUtils.isNotEmpty(avatarUrl)) {
-                            if (!userInfo.getAvatarUrl().isEmpty()) {
-                                // Xóa file vật lý nếu cần
-                                File fileToDelete = new File(folderNameAvt + "/" + userInfo.getAvatarUrl().substring(Constant.URL_IMG_AVATAR.length()));
-                                if (fileToDelete.exists()) {
-                                    fileToDelete.delete();
-                                }
+//                // Lấy tên gốc của file và tạo tên duy nhất
+////                if (avatar != null) {
+////                    String originalFilename = Objects.requireNonNull(avatar.getOriginalFilename());
+////                    if (!Constant.URL_IMG_AVATAR.concat(originalFilename).equals(userInfo.getAvatarUrl())) {
+////                        String uniqueFilename = getUniqueFilename(folderNameAvt, originalFilename);
+////                        String avatarUrl = saveImage(folderNameAvt, avatar, uniqueFilename);
+////                        if (StringUtils.isNotEmpty(avatarUrl)) {
+////                            if (!userInfo.getAvatarUrl().isEmpty()) {
+////                                // Xóa file vật lý nếu cần
+////                                File fileToDelete = new File(folderNameAvt + "/" + userInfo.getAvatarUrl().substring(Constant.URL_IMG_AVATAR.length()));
+////                                if (fileToDelete.exists()) {
+////                                    fileToDelete.delete();
+////                                }
+////                            }
+////                            userInfo.setAvatarUrl(Constant.URL_IMG_AVATAR.concat(uniqueFilename));
+////                        }
+////                    }
+////                } else {
+////                    if (!userInfo.getAvatarUrl().isEmpty()) {
+////                        // Xóa file vật lý nếu cần
+////                        File fileToDelete = new File(folderNameAvt + "/" + userInfo.getAvatarUrl().substring(Constant.URL_IMG_AVATAR.length()));
+////                        if (fileToDelete.exists()) {
+////                            fileToDelete.delete();
+////                        }
+////                    }
+////                    userInfo.setAvatarUrl("");
+////                }
+////                List<ObjectId> hoSoID1s = new ArrayList<>();
+////                List<ObjectId> hoSoIDs = new ArrayList<>(userInfo.getIdHoSo() == null ? hoSoID1s : userInfo.getIdHoSo());
+////                if (files != null && files.toArray().length > 0) {
+////                    List<String> urls = new ArrayList<>();
+////                    if (request.getFilesOld() != null) {
+////                        for (String urlOld : request.getFilesOld()) {
+////                            String url = urlOld.substring(domain.length());
+////                            urls.add(url);
+////                        }
+////                    }
+////
+////                    // Lấy danh sách path của các file được upload từ MultipartFile[]
+////                    Set<String> uploadedFilePaths = files.stream()
+////                            .filter(file -> file != null && !file.isEmpty())
+////                            .map(file -> Constant.URL_IMG_FILE.concat(Objects.requireNonNull(file.getOriginalFilename())))
+////                            .collect(Collectors.toSet());
+////
+////                    uploadedFilePaths.addAll(urls);
+////
+////                    // Kiểm tra và xóa các HoSo cũ không còn trong danh sách upload
+////                    List<ObjectId> idsToRemove = new ArrayList<>();
+////                    for (ObjectId idHoSo : userInfo.getIdHoSo() == null ? hoSoID1s : userInfo.getIdHoSo()) {
+////                        HoSo hoSo = hoSoRepository.findById(String.valueOf(idHoSo)).orElse(null);
+////                        if (hoSo != null && !uploadedFilePaths.contains(hoSo.getPath())) {
+////                            // Xóa file vật lý nếu cần
+////                            File fileToDelete = new File(folderNameFile + "/" + hoSo.getName());
+////                            if (fileToDelete.exists()) {
+////                                fileToDelete.delete();
+////                            }
+////                            // Xóa bản ghi HoSo khỏi MongoDB
+////                            hoSoRepository.delete(hoSo);
+////                            idsToRemove.add(idHoSo); // Đánh dấu để xóa khỏi hoSoIDs
+////                        }
+////                    }
+////                    hoSoIDs.removeAll(idsToRemove); // Cập nhật hoSoIDs sau khi xóa
+////
+////                    // Xử lý các file được upload
+////                    for (MultipartFile file : files) {
+////                        if (file == null || file.isEmpty()) {
+////                            continue; // Bỏ qua nếu file rỗng
+////                        }
+////
+////                        String originalFilename = Objects.requireNonNull(file.getOriginalFilename());
+////                        String filePath = Constant.URL_IMG_FILE.concat(originalFilename);
+////
+////                        // Kiểm tra xem file đã tồn tại chưa
+////                        boolean fileExists = false;
+////                        for (ObjectId idHoSo : userInfo.getIdHoSo() == null ? hoSoID1s : userInfo.getIdHoSo()) {
+////                            HoSo hoSo = hoSoRepository.findById(String.valueOf(idHoSo)).orElse(null);
+////                            if (hoSo != null && filePath.equals(hoSo.getPath())) {
+////                                fileExists = true;
+////                                break;
+////                            }
+////                        }
+////
+////                        // Nếu file không tồn tại, lưu file và tạo HoSo mới
+////                        if (!fileExists) {
+////                            String uniqueFilename = getUniqueFilename(folderNameFile, originalFilename);
+////                            saveImage(folderNameFile, file, uniqueFilename);
+////
+////                            HoSo hoSo1 = new HoSo();
+////                            hoSo1.setId(new ObjectId());
+////                            hoSo1.setName(uniqueFilename);
+////                            hoSo1.setPath(Constant.URL_IMG_FILE.concat(uniqueFilename));
+////                            hoSo1.setCreatedAt(DateUtil.genCreatedAt(null));
+////                            hoSo1.setUpdatedAt(DateUtil.genCreatedAt(null));
+////                            hoSo1.setType(getFileExtension(uniqueFilename));
+////                            String unit = convertMultipartFileToUnit(file);
+////                            hoSo1.setCapacity(unit);
+////
+////                            // Lưu vào MongoDB và thêm ID vào danh sách
+////                            hoSoRepository.save(hoSo1);
+////                            hoSoIDs.add(hoSo1.getId());
+////                        }
+////                    }
+////                }
+////                if (files == null && (request.getFilesOld() == null || request.getFilesOld().isEmpty())) {
+////                    for (ObjectId idHoSo : userInfo.getIdHoSo() == null ? hoSoID1s : userInfo.getIdHoSo()) {
+////                        HoSo hoSo = hoSoRepository.findById(String.valueOf(idHoSo)).orElse(null);
+////                        if (hoSo != null) {
+////                            // Xóa file vật lý nếu cần
+////                            File fileToDelete = new File(folderNameFile + "/" + hoSo.getName());
+////                            if (fileToDelete.exists()) {
+////                                fileToDelete.delete();
+////                            }
+////                            // Xóa bản ghi HoSo khỏi MongoDB
+////                            hoSoRepository.delete(hoSo);
+////                        }
+////                    }
+////                    hoSoIDs.clear();
+////                }
+////                userInfo.setIdHoSo(hoSoIDs);
+////                accountRepository.save(account);
+////                userInfoRepository.save(userInfo);
+                List<ObjectId> hoSoIDs = userInfo.getIdHoSo() != null ? new ArrayList<>(userInfo.getIdHoSo()) : new ArrayList<>();
+
+                // Xử lý avatar + files thông qua fileUtil
+                if ((files != null && !files.isEmpty()) || (avatar != null && !avatar.isEmpty())) {
+                    List<MultipartFile> allFiles = new ArrayList<>();
+                    List<String> mappings = new ArrayList<>();
+
+                    String username = account.getUsername();
+
+                    if (files != null) {
+                        for (MultipartFile file : files) {
+                            allFiles.add(file);
+                            mappings.add(Constant.HRM.concat(username.concat(Objects.requireNonNull(file.getOriginalFilename()))));
+                        }
+                    }
+
+                    if (avatar != null && !avatar.isEmpty()) {
+                        allFiles.add(avatar);
+                        mappings.add(Constant.HRM.concat(username.concat(Objects.requireNonNull(avatar.getOriginalFilename()))));
+                    }
+
+                    // Gọi writeFile
+                    FileResponse fileResponse = fileUtil.writeFile(allFiles, mappings);
+                    if (fileResponse.getSuccess() && !fileResponse.getFiles().isEmpty()) {
+                        // Xóa các HoSo cũ trước
+                        if (userInfo.getIdHoSo() != null) {
+                            for (ObjectId id : userInfo.getIdHoSo()) {
+                                hoSoRepository.deleteById(String.valueOf(id));
                             }
-                            userInfo.setAvatarUrl(Constant.URL_IMG_AVATAR.concat(uniqueFilename));
+                        }
+                        hoSoIDs.clear();
+
+                        for (int i = 0; i < fileResponse.getFiles().size(); i++) {
+                            FileDto fileDetail = fileResponse.getFiles().get(i);
+
+                            // Nếu là avatar (file cuối cùng)
+                            if (avatar != null && !avatar.isEmpty() && i == fileResponse.getFiles().size() - 1) {
+                                userInfo.setAvatarId(fileDetail.getFileId());
+                            } else {
+                                HoSo hoSo = new HoSo();
+                                hoSo.setImageId(fileDetail.getFileId());
+                                hoSo.setType(fileDetail.getType());
+                                hoSo.setCreatedAt(DateUtil.genCreatedAt(null));
+                                hoSo.setUpdatedAt(DateUtil.genCreatedAt(null));
+                                hoSoRepository.save(hoSo);
+                                hoSoIDs.add(hoSo.getId());
+                            }
                         }
                     }
                 } else {
-                    if (!userInfo.getAvatarUrl().isEmpty()) {
-                        // Xóa file vật lý nếu cần
-                        File fileToDelete = new File(folderNameAvt + "/" + userInfo.getAvatarUrl().substring(Constant.URL_IMG_AVATAR.length()));
-                        if (fileToDelete.exists()) {
-                            fileToDelete.delete();
-                        }
-                    }
-                    userInfo.setAvatarUrl("");
-                }
-                List<ObjectId> hoSoID1s = new ArrayList<>();
-                List<ObjectId> hoSoIDs = new ArrayList<>(userInfo.getIdHoSo() == null ? hoSoID1s : userInfo.getIdHoSo());
-                if (files != null && files.toArray().length > 0) {
-                    List<String> urls = new ArrayList<>();
-                    if (request.getFilesOld() != null) {
-                        for (String urlOld : request.getFilesOld()) {
-                            String url = urlOld.substring(domain.length());
-                            urls.add(url);
-                        }
-                    }
-
-                    // Lấy danh sách path của các file được upload từ MultipartFile[]
-                    Set<String> uploadedFilePaths = files.stream()
-                            .filter(file -> file != null && !file.isEmpty())
-                            .map(file -> Constant.URL_IMG_FILE.concat(Objects.requireNonNull(file.getOriginalFilename())))
-                            .collect(Collectors.toSet());
-
-                    uploadedFilePaths.addAll(urls);
-
-                    // Kiểm tra và xóa các HoSo cũ không còn trong danh sách upload
-                    List<ObjectId> idsToRemove = new ArrayList<>();
-                    for (ObjectId idHoSo : userInfo.getIdHoSo() == null ? hoSoID1s : userInfo.getIdHoSo()) {
-                        HoSo hoSo = hoSoRepository.findById(String.valueOf(idHoSo)).orElse(null);
-                        if (hoSo != null && !uploadedFilePaths.contains(hoSo.getPath())) {
-                            // Xóa file vật lý nếu cần
-                            File fileToDelete = new File(folderNameFile + "/" + hoSo.getName());
-                            if (fileToDelete.exists()) {
-                                fileToDelete.delete();
-                            }
-                            // Xóa bản ghi HoSo khỏi MongoDB
-                            hoSoRepository.delete(hoSo);
-                            idsToRemove.add(idHoSo); // Đánh dấu để xóa khỏi hoSoIDs
-                        }
-                    }
-                    hoSoIDs.removeAll(idsToRemove); // Cập nhật hoSoIDs sau khi xóa
-
-                    // Xử lý các file được upload
-                    for (MultipartFile file : files) {
-                        if (file == null || file.isEmpty()) {
-                            continue; // Bỏ qua nếu file rỗng
-                        }
-
-                        String originalFilename = Objects.requireNonNull(file.getOriginalFilename());
-                        String filePath = Constant.URL_IMG_FILE.concat(originalFilename);
-
-                        // Kiểm tra xem file đã tồn tại chưa
-                        boolean fileExists = false;
-                        for (ObjectId idHoSo : userInfo.getIdHoSo() == null ? hoSoID1s : userInfo.getIdHoSo()) {
-                            HoSo hoSo = hoSoRepository.findById(String.valueOf(idHoSo)).orElse(null);
-                            if (hoSo != null && filePath.equals(hoSo.getPath())) {
-                                fileExists = true;
-                                break;
-                            }
-                        }
-
-                        // Nếu file không tồn tại, lưu file và tạo HoSo mới
-                        if (!fileExists) {
-                            String uniqueFilename = getUniqueFilename(folderNameFile, originalFilename);
-                            saveImage(folderNameFile, file, uniqueFilename);
-
-                            HoSo hoSo1 = new HoSo();
-                            hoSo1.setId(new ObjectId());
-                            hoSo1.setName(uniqueFilename);
-                            hoSo1.setPath(Constant.URL_IMG_FILE.concat(uniqueFilename));
-                            hoSo1.setCreatedAt(DateUtil.genCreatedAt(null));
-                            hoSo1.setUpdatedAt(DateUtil.genCreatedAt(null));
-                            hoSo1.setType(getFileExtension(uniqueFilename));
-                            String unit = convertMultipartFileToUnit(file);
-                            hoSo1.setCapacity(unit);
-
-                            // Lưu vào MongoDB và thêm ID vào danh sách
-                            hoSoRepository.save(hoSo1);
-                            hoSoIDs.add(hoSo1.getId());
-                        }
-                    }
-                }
-                if (files == null && (request.getFilesOld() == null || request.getFilesOld().isEmpty())) {
-                    for (ObjectId idHoSo : userInfo.getIdHoSo() == null ? hoSoID1s : userInfo.getIdHoSo()) {
-                        HoSo hoSo = hoSoRepository.findById(String.valueOf(idHoSo)).orElse(null);
-                        if (hoSo != null) {
-                            // Xóa file vật lý nếu cần
-                            File fileToDelete = new File(folderNameFile + "/" + hoSo.getName());
-                            if (fileToDelete.exists()) {
-                                fileToDelete.delete();
-                            }
-                            // Xóa bản ghi HoSo khỏi MongoDB
-                            hoSoRepository.delete(hoSo);
+                    // Nếu người dùng đã xoá hết files + avatar
+                    if (userInfo.getIdHoSo() != null) {
+                        for (ObjectId id : userInfo.getIdHoSo()) {
+                            hoSoRepository.deleteById(String.valueOf(id));
                         }
                     }
                     hoSoIDs.clear();
+                    userInfo.setAvatarId(null);
                 }
+
                 userInfo.setIdHoSo(hoSoIDs);
                 accountRepository.save(account);
                 userInfoRepository.save(userInfo);
