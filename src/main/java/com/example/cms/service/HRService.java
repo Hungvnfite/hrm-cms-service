@@ -142,12 +142,11 @@ public class HRService {
 
         try {
             var response = feignClient.applicantReview(transactionId, request);
-            Map<String, Object> data = (Map<String, Object>)
-                    (response.getData() != null ? response.getData() : new HashMap<>());
+            Map<String, Object> data = (Map<String, Object>) (response.getData() != null ? response.getData() : new HashMap<>());
             Map<String, Object> resultMap = (Map<String, Object>) response.getResult();
             Boolean isOK = (Boolean) resultMap.get("isOK");
 
-            if (data == null && !isOK) {
+            if (data.isEmpty() && !isOK) {
                 result = new Result(ResponseCode.SYSTEM.getCode(), false, "Không lấy được thông tin ứng viên");
                 resultExecute.put(Constant.RESPONSE_KEY.RESULT, result);
                 return resultExecute;
@@ -157,7 +156,7 @@ public class HRService {
                 var exits = accountRepository.findTopByUsernameAndIsDelete(request.getUsername(),false);
 
                 if(exits != null){
-                    result = new Result(ResponseCode.SYSTEM.getCode(), false, "Username đã tồn tại ! Vui lòng kiểm rta lại");
+                    result = new Result(ResponseCode.SYSTEM.getCode(), false, "Username đã tồn tại, Vui lòng kiểm tra lại!");
                     resultExecute.put(Constant.RESPONSE_KEY.RESULT, result);
                     return resultExecute;
                 }
@@ -168,7 +167,7 @@ public class HRService {
                 BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
                 account.setPassword(encoder.encode(request.getPassword()));
                 account.setIsFirstPassword(true);
-                account.setTypeAccount(1);
+                account.setTypeAccount(2);
                 account.setCreatedAt(DateUtil.genCreatedAt(null));
                 account.setUpdatedAt(DateUtil.genCreatedAt(null));
 
@@ -187,7 +186,7 @@ public class HRService {
                 result = new Result(ResponseCode.SYSTEM.getCode(), false, "Đã gửi mail cho ứng viên");
                 resultExecute.put(Constant.RESPONSE_KEY.RESULT, result);
                 return resultExecute;
-            }else {
+            }else if(Objects.equals(request.getInterviewStatus(), "1") && isOK){
                 String name = (String) data.get("name");
                 String email = (String) data.get("email") != null ? (String) data.get("email") : "ecommercedemo47@gmail.com";
                 String interviewDate = (String) data.get("interviewDate");
