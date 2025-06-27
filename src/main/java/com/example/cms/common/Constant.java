@@ -10,6 +10,7 @@ public class Constant {
     public static final String REFRESH_STRING = "refresh";
     public static final String URL_IMG_AVATAR = "/images/hrm_avt/";
     public static final String URL_IMG_FILE = "/images/hrm_file/";
+    public static final String HRM = "HRM";
 
     public interface IGNORE_URL {
         String LOGIN = "/api/hrm-app/auth";

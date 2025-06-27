@@ -9,6 +9,8 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.util.List;
+
 @Document(collection = "tbl_ho_so")
 @Data
 @AllArgsConstructor
@@ -22,6 +24,10 @@ public class HoSo {
     @Indexed
     @Field(name = "NAME")
     private String name;
+
+    @Indexed
+    @Field(name = "IMAGE_ID")
+    private String imageId;
 
     @Indexed
     @Field(name = "PATH")
